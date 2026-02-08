@@ -43,23 +43,19 @@ Vercel 是專門給前端／React 用的託管服務，你只要把程式碼連�
 2. 會看到你的 **GitHub 帳號底下的 repo 列表**
 3. 找到放「AI 對話介面設計」的那個 repo，點 **Import**
 
-> 若專案在 repo 的**子資料夾**（例如 repo 叫 `talking-library-research`，專案在 `AI 對話介面設計/`）：  
-> 匯入時在 **Root Directory** 那一欄點 **Edit**，改成 `AI 對話介面設計`，再繼續。
+> **重要**：本 repo 根目錄有 **vercel.json**，建置與 API 已設定好。匯入時**不要**設定 Root Directory（維持空白），讓 Vercel 使用 repo 根目錄，這樣 `/api/chat` 才不會因路徑含空格而部署失敗。
 
 ---
 
-### 步驟 3：建置設定（Vite 專案）
+### 步驟 3：建置設定（使用 repo 根目錄的 vercel.json）
 
-Vercel 通常會自動偵測 Vite，你只要確認：
+Repo 根目錄的 **vercel.json** 已指定從 `AI 對話介面設計` 建置前端、輸出到 `AI 對話介面設計/dist`，且 **api/** 在 repo 根目錄（路徑無空格）。
 
 | 欄位 | 值 |
 |------|-----|
-| **Framework Preset** | Vite（若沒自動選，手動選 Vite） |
-| **Build Command** | `npm run build`（預設即可） |
-| **Output Directory** | `dist`（Vite 預設輸出，不用改） |
-| **Install Command** | `npm install`（預設即可） |
+| **Root Directory** | 留空（不要填 `AI 對話介面設計`） |
+| **Build / Output / Install** | 由 vercel.json 控制，無需在 Vercel 畫面改 |
 
-若 **Root Directory** 有設成 `AI 對話介面設計`，這些指令都會在該資料夾裡執行。  
 確認後先**不要**點 Deploy，先做下一步「環境變數」。
 
 ---
@@ -122,7 +118,7 @@ App 會自動從網址讀取 `userId`，實驗資料送進 GAS 時就會帶這�
 ## 五、常見問題
 
 **Q：建置失敗，說找不到某個模組？**  
-- 確認 **Root Directory** 是否設成 `AI 對話介面設計`（若專案在子資料夾）。  
+- 確認 **Root Directory** 留空（使用 repo 根目錄與 vercel.json）。  
 - 確認該資料夾裡有 `package.json`，且本地執行 `npm run build` 會過。
 
 **Q：上線後打不開／白畫面？**  
@@ -144,7 +140,7 @@ App 會自動從網址讀取 `userId`，實驗資料送進 GAS 時就會帶這�
 - [ ] 本地已跑過 `npm run build` 且成功  
 - [ ] 程式碼已 push 到 GitHub（或 GitLab / Bitbucket）  
 - [ ] Vercel 已新增環境變數：`VITE_GAS_LOG_URL`、`OPENAI_API_KEY`  
-- [ ] 若專案在 repo 子資料夾，Root Directory 已設為 `AI 對話介面設計`  
+- [ ] Root Directory 留空，vercel.json 已存在於 repo 根目錄  
 - [ ] 部署完成後用 `?userId=p001` 開一次，確認介面與紀錄正常  
 
 完成以上就可以開始用 Vercel 網址做實驗了。
