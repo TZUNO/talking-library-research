@@ -1,0 +1,18 @@
+# 依賴與建置
+node_modules/
+dist/
+build/
+
+# 環境變數（勿上傳 API Key、GAS 網址）
+.env
+.env.local
+.env.*.local
+
+# 編輯器與系統
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# 除錯
+*.local
