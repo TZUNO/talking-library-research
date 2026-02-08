@@ -95,11 +95,19 @@ module.exports = async function handler(req, res) {
       searchContext = buildSearchContext(searchData);
       const organic = searchData?.organic || [];
       sources = organic.slice(0, 8).map((o) => ({ title: o.title || o.link || '', url: o.link || '' }));
-      const imageList = Array.isArray(imageData) ? imageData : imageData?.images;
+
+      const pickImageUrl = (img) =>
+        img.imageUrl || img.image || img.link || img.url
+          || img.originalImageUrl || img.thumbnailUrl
+          || img.original_image_url || img.thumbnail_url;
+      const pickImageTitle = (img) => img.title || img.snippet || img.text || img.site_title || '';
+
+      let imageList = Array.isArray(imageData) ? imageData : imageData?.images;
+      if (!imageList?.length && searchData?.images?.length) imageList = searchData.images;
       if (imageList && imageList.length) {
         images = imageList.slice(0, 6).map((img) => ({
-          url: img.imageUrl || img.image || img.link || img.url || img.originalImageUrl || img.thumbnailUrl,
-          title: img.title || img.snippet || img.text || '',
+          url: pickImageUrl(img),
+          title: pickImageTitle(img),
         })).filter((img) => img.url);
       }
     } catch (err) {
