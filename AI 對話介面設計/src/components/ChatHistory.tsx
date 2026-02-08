@@ -41,14 +41,14 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-6 py-8">
       {messages.map((message, i) => (
-        <div
-          key={i}
-          className={`flex gap-4 ${
-            message.role === 'user' ? 'justify-end' : 'justify-start'
-          }`}
-        >
+        <div key={i} className="mb-6 last:mb-0">
+          <div
+            className={`flex gap-4 ${
+              message.role === 'user' ? 'justify-end' : 'justify-start'
+            }`}
+          >
           {message.role === 'assistant' && (
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
               <Bot className="w-5 h-5 text-emerald-500" />
@@ -137,11 +137,12 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
               <User className="w-5 h-5 text-muted-foreground" />
             </div>
           )}
+          </div>
         </div>
       ))}
 
       {isSubmitting && (
-        <div className="flex gap-4 justify-start">
+        <div className="mb-0 flex gap-4 justify-start">
           <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
             <Bot className="w-5 h-5 text-emerald-500" />
           </div>
