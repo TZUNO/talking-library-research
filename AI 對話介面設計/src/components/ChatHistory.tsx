@@ -41,7 +41,7 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
       {messages.map((message, i) => (
         <div
           key={i}
@@ -72,12 +72,14 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                   ))}
                 </div>
               ) : (
-                message.content.split('\n').map((line, j) => (
-                  <span key={j}>
-                    {j > 0 && <br />}
-                    {line}
-                  </span>
-                ))
+                <p className="leading-loose m-0">
+                  {message.content.split('\n').map((line, j) => (
+                    <span key={j}>
+                      {j > 0 && <br />}
+                      {line}
+                    </span>
+                  ))}
+                </p>
               )}
             </div>
             {message.role === 'assistant' && (message.sources?.length ?? 0) > 0 && (
