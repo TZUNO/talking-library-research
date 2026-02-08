@@ -81,7 +81,7 @@ export default function App() {
     setIsSubmitting(true);
 
     try {
-      const reply = await chatMaterialQuery(userText, apiKey);
+      const reply = await chatMaterialQuery(userText, apiKey, messages);
       setMessages((prev) => [
         ...prev,
         {

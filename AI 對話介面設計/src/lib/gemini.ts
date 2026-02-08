@@ -24,15 +24,24 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface HistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 /**
- * 發送使用者輸入，取得材質檢索回覆（單輪，含搜尋結果時為圖文並茂）
+ * 發送使用者輸入，取得材質檢索回覆（支援多輪對話：傳入 history 會一併送給 API 作為上下文）
  */
 export async function chatMaterialQuery(
   userMessage: string,
-  apiKey?: string
+  apiKey?: string,
+  history?: HistoryMessage[]
 ): Promise<ChatResponse> {
-  const payload: { message: string; apiKey?: string } = { message: userMessage };
+  const payload: { message: string; apiKey?: string; history?: HistoryMessage[] } = {
+    message: userMessage,
+  };
   if (apiKey) payload.apiKey = apiKey;
+  if (history?.length) payload.history = history.map((m) => ({ role: m.role, content: m.content }));
 
   const res = await fetch('/api/chat', {
     method: 'POST',

@@ -74,6 +74,14 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: '缺少 message 欄位' });
   }
 
+  const MAX_HISTORY = 20;
+  const rawHistory = Array.isArray(body?.history) ? body.history : [];
+  const history = rawHistory
+    .slice(-MAX_HISTORY)
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .map((m) => ({ role: m.role, content: String(m.content).trim() }))
+    .filter((m) => m.content.length > 0);
+
   const openaiKey = body?.apiKey?.trim() || process.env.OPENAI_API_KEY;
   if (!openaiKey) {
     return res.status(500).json({
@@ -123,6 +131,12 @@ module.exports = async function handler(req, res) {
     ? `使用者問題：${message}\n\n請根據上方搜尋結果回答，並在回答中適當引用來源。`
     : message;
 
+  const openaiMessages = [
+    { role: 'system', content: systemPrompt },
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+    { role: 'user', content: userContent },
+  ];
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -132,10 +146,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userContent },
-        ],
+        messages: openaiMessages,
       }),
     });
 
