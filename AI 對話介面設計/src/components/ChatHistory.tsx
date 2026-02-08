@@ -56,21 +56,29 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
           )}
 
           <div
-            className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+            className={`max-w-[80%] rounded-2xl px-5 py-4 ${
               message.role === 'user'
                 ? 'bg-emerald-600 text-white'
                 : 'bg-card border border-border text-foreground'
             }`}
           >
             <div className="text-sm break-words">
-              {message.role === 'assistant'
-                ? simpleMarkdownToReact(message.content)
-                : message.content.split('\n').map((line, j) => (
-                    <span key={j}>
-                      {j > 0 && <br />}
-                      {line}
-                    </span>
+              {message.role === 'assistant' ? (
+                <div className="space-y-4">
+                  {message.content.split(/\n\n+/).map((paragraph, j) => (
+                    <p key={j} className="leading-loose m-0">
+                      {simpleMarkdownToReact(paragraph.trim())}
+                    </p>
                   ))}
+                </div>
+              ) : (
+                message.content.split('\n').map((line, j) => (
+                  <span key={j}>
+                    {j > 0 && <br />}
+                    {line}
+                  </span>
+                ))
+              )}
             </div>
             {message.role === 'assistant' && (message.sources?.length ?? 0) > 0 && (
               <div className="mt-3 pt-3 border-t border-border">
