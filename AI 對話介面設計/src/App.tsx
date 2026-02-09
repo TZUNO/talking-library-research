@@ -48,7 +48,7 @@ export default function App() {
   const handleTemplateClick = useCallback(
     (prompt: string, templateId: string) => {
       tracking.recordClick(templateId);
-      setInputValue(prompt);
+      setInputValue((prev) => (prev.trim() ? `${prev.trim()}\n${prompt}` : prompt));
       setTimeout(() => {
         const textarea = document.querySelector('textarea');
         (textarea as HTMLTextAreaElement)?.focus();
@@ -95,6 +95,7 @@ export default function App() {
         userId: pid,
         interfaceType,
         inputText: userText,
+        inputLength: userText.length,
         thoughtTime,
         inputDuration,
         clickPath,
@@ -109,11 +110,13 @@ export default function App() {
         userId: pid,
         interfaceType,
         inputText: userText,
+        inputLength: userText.length,
         thoughtTime,
         inputDuration,
         clickPath,
         timestamp,
         responseStatus: 'error',
+        responseLength: 0,
         errorMessage: msg,
       }).catch(() => {});
     } finally {

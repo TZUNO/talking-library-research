@@ -5,11 +5,22 @@
 
 const SHEET_NAME = 'ExperimentalData';
 
+/** 點擊路徑代碼 → 試算表顯示文字 */
+var CLICK_PATH_LABELS = {
+  'template-1': '金屬材質篩選',
+  'template-2': '塑膠橡膠比較',
+  'template-3': '複合材質分析',
+  'template-4': '環保材質推薦',
+  'template-5': '應用場景匹配',
+  'template-6': '規格標準查詢'
+};
+
 /** 欄位標題（與順序） */
 const HEADERS = [
   '受測者代號',
   '介面類型',
   '輸入文字',
+  '輸入字數',
   '思考時間',
   '輸入耗時',
   '點擊路徑',
@@ -45,6 +56,7 @@ function testAppendOne() {
     userId: 'P001',
     interfaceType: 'Template',
     inputText: '測試輸入',
+    inputLength: 4,
     thoughtTime: 5.2,
     inputDuration: 12.3,
     clickPath: ['template-metal', 'submit'],
@@ -69,16 +81,29 @@ function getOrCreateSheet() {
 }
 
 /**
+ * 將點擊路徑代碼轉成試算表顯示文字（template-1～6 對應中文，其餘保留原樣）
+ */
+function formatClickPathForSheet(clickPath) {
+  if (clickPath == null) return '';
+  var arr = Array.isArray(clickPath) ? clickPath : [String(clickPath)];
+  var labels = arr.map(function (key) {
+    var k = String(key).trim();
+    return CLICK_PATH_LABELS[k] || k;
+  });
+  return labels.join(', ');
+}
+
+/**
  * 將前端 payload 轉成與 HEADERS 對應的一列陣列
  */
 function payloadToRow(p) {
-  var clickPath = p.clickPath;
-  var clickPathStr = Array.isArray(clickPath) ? clickPath.join(', ') : String(clickPath || '');
+  var clickPathStr = formatClickPathForSheet(p.clickPath);
 
   return [
     p.userId || '',
     p.interfaceType || '',
     p.inputText || '',
+    p.inputLength != null ? p.inputLength : '',
     p.thoughtTime != null ? p.thoughtTime : '',
     p.inputDuration != null ? p.inputDuration : '',
     clickPathStr,

@@ -9,13 +9,15 @@ export interface ExperimentDataPayload {
   userId: string;
   interfaceType: InterfaceType;
   inputText: string;
+  /** 受試者輸入字數（字元數） */
+  inputLength?: number;
   thoughtTime: number;
   inputDuration: number;
   clickPath: string[];
   timestamp: string;
   /** 回應狀態：success | error */
   responseStatus?: 'success' | 'error';
-  /** 助理回覆字數（成功時） */
+  /** Chatbot 回應字數（成功時為實際字數，失敗時為 0） */
   responseLength?: number;
   /** 錯誤訊息（失敗時） */
   errorMessage?: string;

@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import { Send, Loader2, Mic } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { Send, Loader2 } from 'lucide-react';
 
 interface ConversationInputProps {
   value: string;
@@ -29,7 +29,6 @@ export function ConversationInput({
   onButtonClick,
 }: ConversationInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isListening, setIsListening] = useState(false);
 
   // 自動調整 textarea 高度（多行，約 2～4 行）
   useEffect(() => {
@@ -55,17 +54,6 @@ export function ConversationInput({
     onChange(v);
   };
 
-  const handleVoiceInput = () => {
-    setIsListening(!isListening);
-    // 模擬語音輸入
-    if (!isListening) {
-      setTimeout(() => {
-        setIsListening(false);
-        console.log('語音輸入功能 (需要瀏覽器支援 Web Speech API)');
-      }, 2000);
-    }
-  };
-
   return (
     <div className="relative group shrink-0">
       <div className="relative rounded-xl border border-border bg-card transition-all duration-200 focus-within:border-emerald-500 focus-within:shadow focus-within:shadow-emerald-500/10">
@@ -75,40 +63,24 @@ export function ConversationInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="history-panel-scroll w-full min-h-[80px] max-h-[120px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 resize-none outline-none rounded-xl"
+          className="history-panel-scroll w-full min-h-[80px] max-h-[120px] px-4 py-3 pr-20 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 resize-none outline-none rounded-xl"
           rows={3}
         />
 
         <div className="absolute bottom-3 right-3 flex items-center gap-2">
           <button
             onClick={() => {
-              onButtonClick?.('voice');
-              handleVoiceInput();
-            }}
-            disabled={isSubmitting}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${
-              isListening
-                ? 'bg-red-500 text-white animate-pulse'
-                : 'bg-muted text-muted-foreground hover:bg-emerald-500/20 hover:text-emerald-500'
-            }`}
-            aria-label="語音輸入"
-          >
-            <Mic className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => {
               onButtonClick?.('submit');
               onSubmit();
             }}
             disabled={!value.trim() || isSubmitting}
-            className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 hover:shadow hover:shadow-emerald-500/30 active:scale-95"
+            className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 hover:shadow hover:shadow-emerald-500/30 active:scale-95"
             aria-label={isSubmitting ? '搜尋中' : '開始檢索'}
           >
             {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             )}
           </button>
         </div>
