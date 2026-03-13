@@ -199,13 +199,13 @@ export default function App() {
 
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-6 left-6 w-14 h-14 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg flex items-center justify-center hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 hover:shadow-emerald-500/30 z-30"
+        className="lg:hidden fixed bottom-6 left-6 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg flex items-center justify-center hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 hover:shadow-emerald-500/30 z-30"
         aria-label="開啟檢索記錄"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="28"
+          height="28"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

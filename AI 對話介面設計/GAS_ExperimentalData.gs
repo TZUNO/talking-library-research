@@ -11,7 +11,6 @@ var CLICK_PATH_LABELS = {
   'template-2': '塑膠橡膠比較',
   'template-3': '複合材質分析',
   'template-4': '環保材質推薦',
-  'template-5': '應用場景匹配',
   'template-6': '規格標準查詢'
 };
 

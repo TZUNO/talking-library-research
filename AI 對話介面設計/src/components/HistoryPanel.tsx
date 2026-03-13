@@ -98,7 +98,7 @@ export function HistoryPanel() {
         <div className="flex gap-2 p-1 bg-muted/50 rounded-lg">
           <button
             onClick={() => setActiveTab('recent')}
-            className={`flex-1 px-3 py-2 rounded-md text-sm transition-all duration-200 ${
+            className={`flex-1 px-4 py-2.5 rounded-md text-sm transition-all duration-200 ${
               activeTab === 'recent'
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
@@ -108,13 +108,13 @@ export function HistoryPanel() {
           </button>
           <button
             onClick={() => setActiveTab('favorites')}
-            className={`flex-1 px-3 py-2 rounded-md text-sm transition-all duration-200 flex items-center justify-center gap-1.5 ${
+            className={`flex-1 px-4 py-2.5 rounded-md text-sm transition-all duration-200 flex items-center justify-center gap-1.5 ${
               activeTab === 'favorites'
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Star className="w-3.5 h-3.5" />
+            <Star className="w-4 h-4" />
             我的收藏
           </button>
         </div>
@@ -193,9 +193,9 @@ export function HistoryPanel() {
         <button 
           onClick={handleClearAll}
           disabled={history.length === 0}
-          className="w-full py-2 px-3 rounded-lg border border-border bg-background hover:bg-accent text-sm text-foreground transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2.5 px-4 rounded-lg border border-border bg-background hover:bg-accent text-sm text-foreground transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-5 h-5" />
           清空所有記錄
         </button>
         

@@ -63,7 +63,7 @@ export function ConversationInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="history-panel-scroll w-full min-h-[80px] max-h-[120px] px-4 py-3 pr-20 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 resize-none outline-none rounded-xl"
+          className="history-panel-scroll w-full min-h-[80px] max-h-[120px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 resize-none outline-none rounded-xl"
           rows={3}
         />
 
@@ -74,13 +74,13 @@ export function ConversationInput({
               onSubmit();
             }}
             disabled={!value.trim() || isSubmitting}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 hover:shadow hover:shadow-emerald-500/30 active:scale-95"
+            className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 hover:shadow hover:shadow-emerald-500/30 active:scale-95"
             aria-label={isSubmitting ? '搜尋中' : '開始檢索'}
           >
             {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-6 h-6" />
             )}
           </button>
         </div>

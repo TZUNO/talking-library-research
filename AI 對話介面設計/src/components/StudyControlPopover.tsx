@@ -45,10 +45,10 @@ export function StudyControlPopover({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="relative shrink-0 w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-colors flex items-center justify-center"
+          className="relative shrink-0 w-12 h-12 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-colors flex items-center justify-center"
           aria-label="研究控制面板"
         >
-          <FlaskConical className="w-5 h-5" />
+          <FlaskConical className="w-6 h-6" />
           {showBadge && (
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-background" aria-hidden />
           )}
@@ -62,7 +62,7 @@ export function StudyControlPopover({
               <button
                 type="button"
                 onClick={() => onInterfaceTypeChange('Template')}
-                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   interfaceType === 'Template'
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -73,7 +73,7 @@ export function StudyControlPopover({
               <button
                 type="button"
                 onClick={() => onInterfaceTypeChange('Free-form')}
-                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   interfaceType === 'Free-form'
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -123,9 +123,9 @@ export function StudyControlPopover({
           <button
             type="button"
             onClick={handleSave}
-            className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-5 h-5" />
             {saved ? '已儲存' : 'Save'}
           </button>
 
