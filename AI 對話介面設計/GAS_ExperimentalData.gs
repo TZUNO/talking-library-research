@@ -5,15 +5,6 @@
 
 const SHEET_NAME = 'ExperimentalData';
 
-/** 點擊路徑代碼 → 試算表顯示文字 */
-var CLICK_PATH_LABELS = {
-  'template-1': '金屬材質篩選',
-  'template-2': '塑膠／橡膠比較',
-  'template-3': '複合材質分析',
-  'template-4': '環保材質推薦',
-  'template-6': '規格標準查詢'
-};
-
 /** 欄位標題（與順序） */
 const HEADERS = [
   '受測者代號',
@@ -58,7 +49,7 @@ function testAppendOne() {
     inputLength: 4,
     thoughtTime: 5.2,
     inputDuration: 12.3,
-    clickPath: ['template-metal', 'submit'],
+    clickPath: ['template-1', 'submit'],
     timestamp: new Date().toISOString(),
     responseStatus: 'success',
     responseLength: 100
@@ -80,16 +71,11 @@ function getOrCreateSheet() {
 }
 
 /**
- * 將點擊路徑代碼轉成試算表顯示文字（template-1～6 對應中文，其餘保留原樣）
+ * 將點擊路徑轉成試算表顯示：原始陣列格式 [template-1, submit]
  */
 function formatClickPathForSheet(clickPath) {
   if (clickPath == null) return '';
-  var arr = Array.isArray(clickPath) ? clickPath : [String(clickPath)];
-  var labels = arr.map(function (key) {
-    var k = String(key).trim();
-    return CLICK_PATH_LABELS[k] || k;
-  });
-  return labels.join(', ');
+  return Array.isArray(clickPath) ? JSON.stringify(clickPath) : String(clickPath);
 }
 
 /**

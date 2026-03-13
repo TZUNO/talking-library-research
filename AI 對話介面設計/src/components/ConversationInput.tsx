@@ -32,6 +32,7 @@ export function ConversationInput({
   onButtonClick,
 }: ConversationInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastKeyRef = useRef<string | null>(null);
 
   // 自動調整 textarea 高度（僅在非可調整模式；Free-form 由使用者手動調整）
   useEffect(() => {
@@ -45,11 +46,21 @@ export function ConversationInput({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     onFirstKeystroke?.();
-    // Enter 送出，Shift+Enter 換行
+    // 連續按兩次 Enter 送出，單次 Enter 換行
     if (e.key === 'Enter') {
-      if (e.shiftKey) return; // Shift+Enter 保留預設換行
-      e.preventDefault();
-      onSubmit();
+      if (e.shiftKey) {
+        lastKeyRef.current = null;
+        return;
+      }
+      if (lastKeyRef.current === 'Enter') {
+        e.preventDefault();
+        lastKeyRef.current = null;
+        onSubmit();
+      } else {
+        lastKeyRef.current = 'Enter';
+      }
+    } else {
+      lastKeyRef.current = null;
     }
   };
 
@@ -100,7 +111,7 @@ export function ConversationInput({
       </div>
 
       <div className="mt-2 px-2 text-xs text-muted-foreground text-right">
-        <kbd className="px-1.5 py-0.5 rounded bg-muted/80 border border-border">Enter</kbd> 送出 · <kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Shift</kbd>+<kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Enter</kbd> 換行
+        <kbd className="px-1.5 py-0.5 rounded bg-muted/80 border border-border">Enter</kbd>×2 送出 · <kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Enter</kbd> 換行
       </div>
     </div>
   );
