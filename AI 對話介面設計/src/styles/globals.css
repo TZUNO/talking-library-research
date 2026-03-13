@@ -243,3 +243,22 @@ html {
 .dark .dark-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--border) !important;
 }
+
+/* 輸入框 scrollbar：使用 muted-foreground 避免淺色主題下白色突兀 */
+.input-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) transparent;
+}
+.input-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.input-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.input-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground) !important;
+  border-radius: 3px;
+}
+.input-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground) !important;
+}

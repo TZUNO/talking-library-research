@@ -161,7 +161,7 @@ export default function App() {
 
           {/* 底部輸入區：輸入框 + Template chips（模式在右上角 Popover 切換） */}
           <div
-            className={`border-t border-border bg-card/30 backdrop-blur-sm shrink-0 max-h-[28vh] min-h-0 flex flex-col ${interfaceType === 'Free-form' ? 'min-h-[200px]' : ''}`}
+            className={`border-t border-border bg-card/30 backdrop-blur-sm shrink-0 min-h-0 flex flex-col ${interfaceType === 'Free-form' ? 'max-h-[20vh] min-h-[120px]' : 'max-h-[28vh]'}`}
           >
             <div className="max-w-4xl mx-auto px-4 py-3 space-y-3 overflow-y-auto min-h-0 flex-1 w-full">
               <ConversationInput

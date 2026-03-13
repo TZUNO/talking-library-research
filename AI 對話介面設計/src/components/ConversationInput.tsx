@@ -68,7 +68,7 @@ export function ConversationInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className={`history-panel-scroll w-full min-h-[80px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 outline-none rounded-xl ${
+          className={`input-scrollbar w-full min-h-[80px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 outline-none rounded-xl ${
             allowResize ? 'resize-y max-h-[300px]' : 'resize-none max-h-[120px]'
           }`}
           rows={3}
