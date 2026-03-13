@@ -8,7 +8,7 @@ const SHEET_NAME = 'ExperimentalData';
 /** 點擊路徑代碼 → 試算表顯示文字 */
 var CLICK_PATH_LABELS = {
   'template-1': '金屬材質篩選',
-  'template-2': '塑膠橡膠比較',
+  'template-2': '塑膠／橡膠比較',
   'template-3': '複合材質分析',
   'template-4': '環保材質推薦',
   'template-6': '規格標準查詢'
