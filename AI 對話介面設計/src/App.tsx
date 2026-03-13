@@ -170,6 +170,7 @@ export default function App() {
                 onSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
                 placeholder={inputPlaceholder}
+                allowResize={interfaceType === 'Free-form'}
                 onFirstKeystroke={tracking.recordFirstKeystroke}
                 onFirstChar={tracking.recordFirstChar}
                 onButtonClick={tracking.recordClick}

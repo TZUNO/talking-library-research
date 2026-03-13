@@ -8,6 +8,8 @@ interface ConversationInputProps {
   isSubmitting: boolean;
   /** 輸入框 placeholder，依模式可不同 */
   placeholder?: string;
+  /** 是否允許使用者手動調整輸入框高度（Free-form 模式） */
+  allowResize?: boolean;
   /** 首次鍵盤輸入時呼叫（用於 thoughtTime） */
   onFirstKeystroke?: () => void;
   /** 首次有字元時呼叫（用於 inputDuration） */
@@ -24,25 +26,28 @@ export function ConversationInput({
   onSubmit,
   isSubmitting,
   placeholder = DEFAULT_PLACEHOLDER,
+  allowResize = false,
   onFirstKeystroke,
   onFirstChar,
   onButtonClick,
 }: ConversationInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 自動調整 textarea 高度（多行，約 2～4 行）
+  // 自動調整 textarea 高度（僅在非可調整模式；Free-form 由使用者手動調整）
   useEffect(() => {
+    if (allowResize) return;
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     }
-  }, [value]);
+  }, [value, allowResize]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     onFirstKeystroke?.();
-    // Cmd/Ctrl + Enter 送出
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    // Enter 送出，Shift+Enter 換行
+    if (e.key === 'Enter') {
+      if (e.shiftKey) return; // Shift+Enter 保留預設換行
       e.preventDefault();
       onSubmit();
     }
@@ -63,7 +68,9 @@ export function ConversationInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="history-panel-scroll w-full min-h-[80px] max-h-[120px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 resize-none outline-none rounded-xl"
+          className={`history-panel-scroll w-full min-h-[80px] px-4 py-3 pr-24 leading-6 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/70 outline-none rounded-xl ${
+            allowResize ? 'resize-y max-h-[300px]' : 'resize-none max-h-[120px]'
+          }`}
           rows={3}
         />
 
@@ -93,7 +100,7 @@ export function ConversationInput({
       </div>
 
       <div className="mt-2 px-2 text-xs text-muted-foreground text-right">
-        <kbd className="px-1.5 py-0.5 rounded bg-muted/80 border border-border">⌘</kbd> + <kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Enter</kbd> 送出
+        <kbd className="px-1.5 py-0.5 rounded bg-muted/80 border border-border">Enter</kbd> 送出 · <kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Shift</kbd>+<kbd className="rounded bg-muted/80 border border-border px-1.5 py-0.5">Enter</kbd> 換行
       </div>
     </div>
   );
