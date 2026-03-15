@@ -19,6 +19,8 @@ export interface ExperimentDataPayload {
   responseStatus?: 'success' | 'error';
   /** Chatbot 回應字數（成功時為實際字數，失敗時為 0） */
   responseLength?: number;
+  /** AI 回應完整內容（成功時；失敗時為空） */
+  responseText?: string;
   /** 錯誤訊息（失敗時） */
   errorMessage?: string;
 }

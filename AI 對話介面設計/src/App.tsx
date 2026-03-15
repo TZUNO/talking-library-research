@@ -102,6 +102,7 @@ export default function App() {
         timestamp,
         responseStatus: 'success',
         responseLength: reply.text.length,
+        responseText: reply.text,
       }).catch(() => {});
     } catch (err) {
       const msg = err instanceof Error ? err.message : '檢索時發生錯誤，請稍後再試。';

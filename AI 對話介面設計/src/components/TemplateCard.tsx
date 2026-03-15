@@ -28,37 +28,37 @@ const templates: Template[] = [
   {
     id: '1',
     icon: <Hammer className="w-4 h-4" />,
-    title: '金屬材質篩選',
-    description: '強度、耐腐蝕性、散熱性、加工性、使用情境',
-    prompt: '我想找金屬材質，需求包含強度、耐腐蝕性、散熱性、加工性，以及預計使用情境：'
+    title: '展示牆氛圍感',
+    description: '安定、親和、生活感',
+    prompt: '幫我找適合百貨展示牆的材料，需營造安定、親和與生活感的空間氛圍。'
   },
   {
     id: '2',
     icon: <Shapes className="w-4 h-4" />,
-    title: '塑膠／橡膠比較',
-    description: '彈性、耐化學性、耐候性、成本範圍、產品用途',
-    prompt: '我想比較塑膠或橡膠材質，考量包含彈性、耐化學性、耐候性、成本範圍，以及產品用途：'
+    title: '商業展示牆面',
+    description: '被服務、安心、有質感',
+    prompt: '請推薦適合商業展示空間的牆面材料，讓顧客感受到被服務、安心且有質感。'
   },
   {
     id: '3',
     icon: <Layers className="w-4 h-4" />,
-    title: '複合材質分析',
-    description: '纖維類型、結構形式、強度表現、耐久性、應用方向',
-    prompt: '我想分析木頭加金屬的複合材質，包含纖維類型、結構形式、強度表現、耐久性，以及應用方向：'
+    title: '比較兩種展示牆',
+    description: '氛圍、質感、使用情境',
+    prompt: '我想比較兩種適合百貨專櫃展示牆的材料，請從氛圍、質感與使用情境分析差異。'
   },
   {
     id: '4',
     icon: <Recycle className="w-4 h-4" />,
-    title: '環保材質推薦',
-    description: '可回收性、碳足跡、生物基、可分解性、環境認證',
-    prompt: '我想找環保材質，考量包含可回收性、碳足跡、生物基含量、可分解性、環境認證，以及產品類別：'
+    title: '易清潔耐用',
+    description: '清潔、耐用、低維護、施工',
+    prompt: '幫我找適合百貨展示牆的材料，條件包含容易清潔、耐用、低維護與施工可行。'
   },
   {
-    id: '6',
+    id: '5',
     icon: <FileText className="w-4 h-4" />,
-    title: '規格標準查詢',
-    description: 'ASTM、ISO、DIN、CNS、測試方法、認證、品質規範',
-    prompt: '我想查詢材質相關標準，例如 ASTM／ISO／DIN／CNS、測試方法、認證要求、品質規範，以及材質類型'
+    title: '防火可回收',
+    description: '防火 A1、可回收、商業空間',
+    prompt: '請推薦符合防火 A1、可回收且適合商業空間使用的展示牆材料，並比較兩種選項。'
   }
 ];
 

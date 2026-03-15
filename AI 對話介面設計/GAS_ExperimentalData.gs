@@ -17,6 +17,7 @@ const HEADERS = [
   '時間戳記',
   '回應狀態',
   '回應字數',
+  'AI 回應',
   '錯誤訊息'
 ];
 
@@ -52,7 +53,8 @@ function testAppendOne() {
     clickPath: ['template-1', 'submit'],
     timestamp: new Date().toISOString(),
     responseStatus: 'success',
-    responseLength: 100
+    responseLength: 100,
+    responseText: '這是 AI 回應的測試內容。'
   };
   var sheet = getOrCreateSheet();
   sheet.appendRow(payloadToRow(payload));
@@ -95,6 +97,7 @@ function payloadToRow(p) {
     p.timestamp || '',
     p.responseStatus || '',
     p.responseLength != null ? p.responseLength : '',
+    p.responseText || '',
     p.errorMessage || ''
   ];
 }
