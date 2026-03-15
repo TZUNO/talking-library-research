@@ -91,6 +91,7 @@ export default function App() {
           images: reply.images,
         },
       ]);
+      const responseText = typeof reply?.text === 'string' ? reply.text : '';
       logExperimentData({
         userId: pid,
         interfaceType,
@@ -101,8 +102,8 @@ export default function App() {
         clickPath,
         timestamp,
         responseStatus: 'success',
-        responseLength: reply.text.length,
-        responseText: reply.text,
+        responseLength: responseText.length,
+        responseText,
       }).catch(() => {});
     } catch (err) {
       const msg = err instanceof Error ? err.message : '檢索時發生錯誤，請稍後再試。';

@@ -19,7 +19,7 @@ export interface ExperimentDataPayload {
   responseStatus?: 'success' | 'error';
   /** Chatbot 回應字數（成功時為實際字數，失敗時為 0） */
   responseLength?: number;
-  /** AI 回應完整內容（成功時；失敗時為空） */
+  /** AI 回應完整內容（成功時；失敗時為空；Sheets 單格上限 50000 字元） */
   responseText?: string;
   /** 錯誤訊息（失敗時） */
   errorMessage?: string;
@@ -41,13 +41,18 @@ export async function logExperimentData(
   }
 
   try {
+    // 確保 responseText 為字串；Sheets 單格上限 50000 字元
+    const safePayload = { ...payload };
+    if (typeof safePayload.responseText === 'string' && safePayload.responseText.length > 50000) {
+      safePayload.responseText = safePayload.responseText.slice(0, 50000);
+    }
     // 使用 text/plain 避免 CORS 預檢（OPTIONS），GAS 不支援 doOptions
     const res = await fetch(GAS_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain;charset=UTF-8',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(safePayload),
     });
 
     if (!res.ok) {

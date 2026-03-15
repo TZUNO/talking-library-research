@@ -68,8 +68,19 @@ function getOrCreateSheet() {
     sheet = ss.insertSheet(SHEET_NAME);
     sheet.appendRow(HEADERS);
     sheet.getRange('1:1').setFontWeight('bold');
+  } else {
+    ensureHeaders(sheet);
   }
   return sheet;
+}
+
+/** 確保第一列標題與 HEADERS 一致（含 AI 回應欄位） */
+function ensureHeaders(sheet) {
+  var lastCol = sheet.getLastColumn();
+  if (lastCol < HEADERS.length) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
+  }
 }
 
 /**
@@ -81,10 +92,20 @@ function formatClickPathForSheet(clickPath) {
 }
 
 /**
+ * 取得 AI 回應文字（支援 responseText / response_content）
+ */
+function getResponseText(p) {
+  var t = p.responseText || p.response_content || p.response || '';
+  return typeof t === 'string' ? t : String(t || '');
+}
+
+/**
  * 將前端 payload 轉成與 HEADERS 對應的一列陣列
  */
 function payloadToRow(p) {
   var clickPathStr = formatClickPathForSheet(p.clickPath);
+  var responseText = getResponseText(p);
+  if (responseText.length > 50000) responseText = responseText.substring(0, 50000);
 
   return [
     p.userId || '',
@@ -97,7 +118,7 @@ function payloadToRow(p) {
     p.timestamp || '',
     p.responseStatus || '',
     p.responseLength != null ? p.responseLength : '',
-    p.responseText || '',
+    responseText,
     p.errorMessage || ''
   ];
 }
