@@ -5,7 +5,6 @@
 
 const SHEET_NAME = 'ExperimentalData';
 
-/** 欄位標題（與順序） */
 const HEADERS = [
   '受測者代號',
   '介面類型',
@@ -21,27 +20,19 @@ const HEADERS = [
   '錯誤訊息'
 ];
 
-/**
- * 處理 POST 請求：解析 JSON，寫入 ExperimentalData 分頁
- */
 function doPost(e) {
   try {
     var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : '';
     var payload = JSON.parse(raw);
-
     var sheet = getOrCreateSheet();
     var row = payloadToRow(payload);
     sheet.appendRow(row);
-
     return createResponse(200, { ok: true, message: '已寫入一筆記錄' });
   } catch (err) {
     return createResponse(200, { ok: false, error: String(err.message || err) });
   }
 }
 
-/**
- * 僅供測試：在編輯器中執行，用假資料寫入一筆
- */
 function testAppendOne() {
   var payload = {
     userId: 'P001',
@@ -69,44 +60,31 @@ function getOrCreateSheet() {
     sheet.appendRow(HEADERS);
     sheet.getRange('1:1').setFontWeight('bold');
   } else {
-    ensureHeaders(sheet);
+    var lastCol = sheet.getLastColumn();
+    if (lastCol < HEADERS.length) {
+      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+      sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
+    }
   }
   return sheet;
 }
 
-/** 確保第一列標題與 HEADERS 一致（含 AI 回應欄位） */
-function ensureHeaders(sheet) {
-  var lastCol = sheet.getLastColumn();
-  if (lastCol < HEADERS.length) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
-  }
-}
-
-/**
- * 將點擊路徑轉成試算表顯示：原始陣列格式 [template-1, submit]
- */
 function formatClickPathForSheet(clickPath) {
   if (clickPath == null) return '';
   return Array.isArray(clickPath) ? JSON.stringify(clickPath) : String(clickPath);
 }
 
-/**
- * 取得 AI 回應文字（支援 responseText / response_content）
- */
 function getResponseText(p) {
   var t = p.responseText || p.response_content || p.response || '';
   return typeof t === 'string' ? t : String(t || '');
 }
 
-/**
- * 將前端 payload 轉成與 HEADERS 對應的一列陣列
- */
 function payloadToRow(p) {
   var clickPathStr = formatClickPathForSheet(p.clickPath);
   var responseText = getResponseText(p);
-  if (responseText.length > 50000) responseText = responseText.substring(0, 50000);
-
+  if (responseText.length > 50000) {
+    responseText = responseText.substring(0, 50000);
+  }
   return [
     p.userId || '',
     p.interfaceType || '',
