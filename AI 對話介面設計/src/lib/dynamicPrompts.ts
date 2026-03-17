@@ -18,17 +18,17 @@ const DEFAULT_PROMPTS: DynamicPrompt[] = [
   {
     category: '情境／氛圍',
     templateId: 'template-1',
-    prompt: '幫我找適合百貨展示牆的材料，需營造安定、親和與生活感的空間氛圍。',
+    prompt: '幫我找適合百貨展示牆的材料，營造安定、親和的空間氛圍。',
   },
   {
     category: '性能／條件',
     templateId: 'template-2',
-    prompt: '幫我找適合百貨展示牆的材料，條件包含容易清潔、耐用、低維護與施工可行。',
+    prompt: '幫我找適合百貨展示牆的材料，要容易清潔、耐用、低維護。',
   },
   {
     category: '比較／決策',
     templateId: 'template-3',
-    prompt: '請比較兩種適合百貨專櫃展示牆的材料，並說明各自的優缺點與適用理由。',
+    prompt: '請比較兩種適合百貨專櫃展示牆的材料，說明優缺點與適用理由。',
   },
 ];
 
@@ -43,24 +43,23 @@ export function generateDynamicPrompts(inputText: string): DynamicPrompt[] {
     return DEFAULT_PROMPTS;
   }
 
-  // 若輸入過長，擷取前 80 字作為上下文（避免提示過長）
-  const context = trimmed.length > 80 ? trimmed.slice(0, 80) + '…' : trimmed;
+  const context = trimmed.length > 50 ? trimmed.slice(0, 50) + '…' : trimmed;
 
   return [
     {
       category: '情境／氛圍',
       templateId: 'template-1',
-      prompt: `從空間氛圍與使用情境的角度，幫我延伸「${context}」的思考。`,
+      prompt: `從氛圍與情境延伸：「${context}」`,
     },
     {
       category: '性能／條件',
       templateId: 'template-2',
-      prompt: `從材料性能與實務條件，幫我補充「${context}」的考量，如耐用性、防火、可回收、施工可行性等。`,
+      prompt: `補充「${context}」的耐用、防火、可回收等條件`,
     },
     {
       category: '比較／決策',
       templateId: 'template-3',
-      prompt: `請比較兩種符合「${context}」的材料，並說明各自的優缺點與適用理由。`,
+      prompt: `比較兩種符合「${context}」的材料，說明優缺點`,
     },
   ];
 }

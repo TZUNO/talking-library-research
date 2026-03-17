@@ -137,6 +137,8 @@ module.exports = async function handler(req, res) {
     { role: 'user', content: userContent },
   ];
 
+  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -145,7 +147,7 @@ module.exports = async function handler(req, res) {
         Authorization: `Bearer ${openaiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: openaiModel,
         messages: openaiMessages,
       }),
     });
@@ -164,6 +166,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       text,
+      model: openaiModel,
       sources: sources.length ? sources : undefined,
       images: images.length ? images : undefined,
     });
