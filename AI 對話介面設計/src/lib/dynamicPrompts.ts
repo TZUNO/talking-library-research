@@ -1,10 +1,11 @@
 /**
- * 動態提示生成：根據使用者輸入產生三個面向的提示
+ * 動態提示生成：根據使用者輸入或「最後一則 AI 回應」產生三個面向的提示
  * 三個面向固定為：情境／氛圍、性能／條件、比較／決策
  *
- * 若要調整提示模板，請修改：
- * - DEFAULT_PROMPTS：使用者尚未輸入時的預設提示
- * - generateDynamicPrompts 內 return 的 prompt 字串：有輸入時的動態模板
+ * 邏輯：
+ * 1. 若已有 AI 回應 → 以 AI 回應為脈絡，產生後續提問提示
+ * 2. 若無 AI 回應、或輸入為空/提示格式 → 顯示預設三項
+ * 3. 若有使用者輸入（非提示格式）→ 以輸入為脈絡產生提示
  */
 
 export interface DynamicPrompt {
@@ -13,7 +14,7 @@ export interface DynamicPrompt {
   templateId: string;
 }
 
-/** 預設提示（使用者尚未輸入時） */
+/** 預設提示（尚未有對話或輸入時） */
 const DEFAULT_PROMPTS: DynamicPrompt[] = [
   {
     category: '情境／氛圍',
@@ -39,24 +40,56 @@ function isPromptLike(text: string): boolean {
     text.startsWith('補充「') ||
     text.startsWith('比較兩種符合「') ||
     text.startsWith('幫我找適合') ||
-    text.startsWith('請比較兩種')
+    text.startsWith('請比較兩種') ||
+    text.startsWith('從上述回應延伸：') ||
+    text.startsWith('補充上述') ||
+    text.startsWith('請比較上述')
   );
 }
 
 /**
- * 根據使用者輸入產生三個面向的動態提示
- * 若輸入為空、或已是點選過的提示，則顯示預設三項（避免巢狀套用）
+ * 根據使用者輸入與最後一則 AI 回應產生三個面向的動態提示
+ * 優先以「最後 AI 回應」為脈絡；若無則以輸入為脈絡；皆無則顯示預設
+ *
  * @param inputText 使用者目前輸入框中的內容
+ * @param lastAssistantContent 最後一則 AI 回應的純文字（可選）
  * @returns 三個面向的提示陣列
  */
-export function generateDynamicPrompts(inputText: string): DynamicPrompt[] {
+export function generateDynamicPrompts(
+  inputText: string,
+  lastAssistantContent?: string
+): DynamicPrompt[] {
   const trimmed = inputText.trim();
+  const hasAiResponse = lastAssistantContent && lastAssistantContent.trim().length > 0;
+
+  // 已有 AI 回應 → 以 AI 回應為脈絡產生後續提問
+  if (hasAiResponse) {
+    return [
+      {
+        category: '情境／氛圍',
+        templateId: 'template-1',
+        prompt: `從上述回應延伸：我想營造更親和的空間氛圍，該選哪種材料？`,
+      },
+      {
+        category: '性能／條件',
+        templateId: 'template-2',
+        prompt: `補充上述材料的耐用、防火、可回收等條件說明`,
+      },
+      {
+        category: '比較／決策',
+        templateId: 'template-3',
+        prompt: `請比較上述回應中提到的兩種材質，說明優缺點`,
+      },
+    ];
+  }
+
+  // 無 AI 回應：若輸入為空或已是提示格式，顯示預設
   if (!trimmed || isPromptLike(trimmed)) {
     return DEFAULT_PROMPTS;
   }
 
+  // 有使用者輸入（非提示格式）→ 以輸入為脈絡
   const context = trimmed.length > 50 ? trimmed.slice(0, 50) + '…' : trimmed;
-
   return [
     {
       category: '情境／氛圍',

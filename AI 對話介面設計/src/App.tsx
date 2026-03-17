@@ -11,6 +11,15 @@ import { chatMaterialQuery } from './lib/gemini';
 const STORAGE_PARTICIPANT_ID = 'study_participant_id';
 const STORAGE_API_KEY = 'study_api_key';
 
+function getLastAssistantContent(messages: ChatMessage[]): string | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'assistant' && typeof messages[i].content === 'string') {
+      return messages[i].content;
+    }
+  }
+  return undefined;
+}
+
 function loadStoredParticipantId(): string {
   if (typeof window === 'undefined') return '';
   try {
@@ -181,6 +190,7 @@ export default function App() {
               {interfaceType === 'Template' && (
                 <TemplateCard
                   inputValue={inputValue}
+                  lastAssistantContent={getLastAssistantContent(messages)}
                   onTemplateClick={handleTemplateClick}
                 />
               )}

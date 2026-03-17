@@ -3,11 +3,16 @@ import { generateDynamicPrompts } from '../lib/dynamicPrompts';
 
 interface TemplateCardProps {
   inputValue: string;
+  /** 最後一則 AI 回應的純文字，用於產生後續提問提示 */
+  lastAssistantContent?: string;
   onTemplateClick: (prompt: string, templateId: string) => void;
 }
 
-export function TemplateCard({ inputValue, onTemplateClick }: TemplateCardProps) {
-  const prompts = useMemo(() => generateDynamicPrompts(inputValue), [inputValue]);
+export function TemplateCard({ inputValue, lastAssistantContent, onTemplateClick }: TemplateCardProps) {
+  const prompts = useMemo(
+    () => generateDynamicPrompts(inputValue, lastAssistantContent),
+    [inputValue, lastAssistantContent]
+  );
 
   return (
     <div className="flex flex-row items-center gap-x-3 flex-nowrap overflow-x-auto min-h-0 py-1">
