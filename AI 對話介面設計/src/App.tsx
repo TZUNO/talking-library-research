@@ -92,7 +92,7 @@ export default function App() {
         },
       ]);
       const responseText = typeof reply?.text === 'string' ? reply.text : '';
-      logExperimentData({
+      await logExperimentData({
         userId: pid,
         interfaceType,
         inputText: userText,
@@ -108,7 +108,7 @@ export default function App() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : '檢索時發生錯誤，請稍後再試。';
       setMessages((prev) => [...prev, { role: 'assistant', content: '檢索失敗：' + msg }]);
-      logExperimentData({
+      await logExperimentData({
         userId: pid,
         interfaceType,
         inputText: userText,

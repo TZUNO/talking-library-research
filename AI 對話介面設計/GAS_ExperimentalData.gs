@@ -22,15 +22,25 @@ const HEADERS = [
 
 function doPost(e) {
   try {
-    var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : '';
+    if (!e || !e.postData || !e.postData.contents) {
+      return createResponse(400, { ok: false, error: 'No request body' });
+    }
+    var raw = String(e.postData.contents);
+    if (!raw.trim()) {
+      return createResponse(400, { ok: false, error: 'Empty body' });
+    }
     var payload = JSON.parse(raw);
     var sheet = getOrCreateSheet();
     var row = payloadToRow(payload);
     sheet.appendRow(row);
     return createResponse(200, { ok: true, message: '已寫入一筆記錄' });
   } catch (err) {
-    return createResponse(200, { ok: false, error: String(err.message || err) });
+    return createResponse(500, { ok: false, error: String(err.message || err) });
   }
+}
+
+function doGet() {
+  return createResponse(200, { ok: true, message: 'GAS 實驗記錄端點正常', version: '1.0' });
 }
 
 function testAppendOne() {

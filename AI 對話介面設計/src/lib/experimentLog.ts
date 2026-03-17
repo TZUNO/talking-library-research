@@ -27,8 +27,15 @@ export interface ExperimentDataPayload {
 
 const GAS_URL = import.meta.env.VITE_GAS_LOG_URL ?? '';
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
- * 將單次實驗回合的資料 POST 到 GAS 網址
+ * 將單次實驗回合的資料 POST 到 GAS 網址（含重試）
  * @param payload 實驗資料
  * @returns 是否成功送出（不拋錯，失敗時回傳 false）
  */
@@ -40,29 +47,29 @@ export async function logExperimentData(
     return false;
   }
 
-  try {
-    // 確保 responseText 為字串；Sheets 單格上限 50000 字元
-    const safePayload = { ...payload };
-    if (typeof safePayload.responseText === 'string' && safePayload.responseText.length > 50000) {
-      safePayload.responseText = safePayload.responseText.slice(0, 50000);
-    }
-    // 使用 text/plain 避免 CORS 預檢（OPTIONS），GAS 不支援 doOptions
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=UTF-8',
-      },
-      body: JSON.stringify(safePayload),
-    });
-
-    if (!res.ok) {
-      console.error('[ExperimentLog] GAS 回傳非 2xx:', res.status, await res.text());
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('[ExperimentLog] 送出失敗:', err);
-    return false;
+  const safePayload = { ...payload };
+  if (typeof safePayload.responseText === 'string' && safePayload.responseText.length > 50000) {
+    safePayload.responseText = safePayload.responseText.slice(0, 50000);
   }
+  const body = JSON.stringify(safePayload);
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body,
+      });
+
+      const text = await res.text();
+      if (res.ok) return true;
+
+      console.error(`[ExperimentLog] GAS 回傳非 2xx (attempt ${attempt + 1}/${MAX_RETRIES + 1}):`, res.status, text);
+      if (attempt < MAX_RETRIES) await sleep(RETRY_DELAY_MS);
+    } catch (err) {
+      console.error(`[ExperimentLog] 送出失敗 (attempt ${attempt + 1}/${MAX_RETRIES + 1}):`, err);
+      if (attempt < MAX_RETRIES) await sleep(RETRY_DELAY_MS);
+    }
+  }
+  return false;
 }
