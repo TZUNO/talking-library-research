@@ -48,7 +48,7 @@ export default function App() {
   const handleTemplateClick = useCallback(
     (prompt: string, templateId: string) => {
       tracking.recordClick(templateId);
-      setInputValue((prev) => (prev.trim() ? `${prev.trim()}\n${prompt}` : prompt));
+      setInputValue(prompt);
       setTimeout(() => {
         const textarea = document.querySelector('textarea');
         (textarea as HTMLTextAreaElement)?.focus();
@@ -179,7 +179,10 @@ export default function App() {
               />
 
               {interfaceType === 'Template' && (
-                <TemplateCard onTemplateClick={handleTemplateClick} />
+                <TemplateCard
+                  inputValue={inputValue}
+                  onTemplateClick={handleTemplateClick}
+                />
               )}
             </div>
           </div>

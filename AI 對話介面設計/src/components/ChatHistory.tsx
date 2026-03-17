@@ -62,17 +62,17 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                 : 'bg-card border border-border text-foreground'
             }`}
           >
-            <div className="text-sm break-words">
+            <div className={`break-words ${message.role === 'assistant' ? 'text-base leading-8 tracking-wide' : 'text-sm leading-loose'}`}>
               {message.role === 'assistant' ? (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {message.content.split(/\n\n+/).map((paragraph, j) => (
-                    <p key={j} className="leading-loose m-0">
+                    <p key={j} className="m-0">
                       {simpleMarkdownToReact(paragraph.trim())}
                     </p>
                   ))}
                 </div>
               ) : (
-                <p className="leading-loose m-0">
+                <p className="m-0">
                   {message.content.split('\n').map((line, j) => (
                     <span key={j}>
                       {j > 0 && <br />}
