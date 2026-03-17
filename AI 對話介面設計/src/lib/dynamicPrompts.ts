@@ -32,14 +32,26 @@ const DEFAULT_PROMPTS: DynamicPrompt[] = [
   },
 ];
 
+/** 輸入是否為已點選的提示（避免巢狀套用） */
+function isPromptLike(text: string): boolean {
+  return (
+    text.startsWith('從氛圍與情境延伸：') ||
+    text.startsWith('補充「') ||
+    text.startsWith('比較兩種符合「') ||
+    text.startsWith('幫我找適合') ||
+    text.startsWith('請比較兩種')
+  );
+}
+
 /**
  * 根據使用者輸入產生三個面向的動態提示
+ * 若輸入為空、或已是點選過的提示，則顯示預設三項（避免巢狀套用）
  * @param inputText 使用者目前輸入框中的內容
  * @returns 三個面向的提示陣列
  */
 export function generateDynamicPrompts(inputText: string): DynamicPrompt[] {
   const trimmed = inputText.trim();
-  if (!trimmed) {
+  if (!trimmed || isPromptLike(trimmed)) {
     return DEFAULT_PROMPTS;
   }
 

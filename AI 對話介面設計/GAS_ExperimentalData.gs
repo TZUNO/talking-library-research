@@ -13,12 +13,20 @@ const HEADERS = [
   '思考時間',
   '輸入耗時',
   '點擊路徑',
+  '提示面向',
   '時間戳記',
   '回應狀態',
   '回應字數',
   'AI 回應',
   '錯誤訊息'
 ];
+
+/** template-X 對應實驗分析用面向 */
+var TEMPLATE_CATEGORY = {
+  'template-1': '情境／氛圍',
+  'template-2': '性能／條件',
+  'template-3': '比較／決策'
+};
 
 function doPost(e) {
   try {
@@ -84,6 +92,17 @@ function formatClickPathForSheet(clickPath) {
   return Array.isArray(clickPath) ? JSON.stringify(clickPath) : String(clickPath);
 }
 
+/** 從點擊路徑取得提示面向（供實驗分析用） */
+function getPromptCategory(clickPath) {
+  if (clickPath == null) return '';
+  var arr = Array.isArray(clickPath) ? clickPath : [String(clickPath)];
+  for (var i = arr.length - 1; i >= 0; i--) {
+    var k = String(arr[i]).trim();
+    if (TEMPLATE_CATEGORY[k]) return TEMPLATE_CATEGORY[k];
+  }
+  return '';
+}
+
 function getResponseText(p) {
   var t = p.responseText || p.response_content || p.response || '';
   return typeof t === 'string' ? t : String(t || '');
@@ -91,6 +110,7 @@ function getResponseText(p) {
 
 function payloadToRow(p) {
   var clickPathStr = formatClickPathForSheet(p.clickPath);
+  var promptCategory = getPromptCategory(p.clickPath);
   var responseText = getResponseText(p);
   if (responseText.length > 50000) {
     responseText = responseText.substring(0, 50000);
@@ -103,6 +123,7 @@ function payloadToRow(p) {
     p.thoughtTime != null ? p.thoughtTime : '',
     p.inputDuration != null ? p.inputDuration : '',
     clickPathStr,
+    promptCategory,
     p.timestamp || '',
     p.responseStatus || '',
     p.responseLength != null ? p.responseLength : '',
