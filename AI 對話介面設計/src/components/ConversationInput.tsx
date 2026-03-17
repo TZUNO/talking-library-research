@@ -85,7 +85,7 @@ export function ConversationInput({
           rows={3}
         />
 
-        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+        <div className="absolute top-3 right-3 flex items-center gap-2">
           <button
             onClick={() => {
               onButtonClick?.('submit');
@@ -104,7 +104,7 @@ export function ConversationInput({
         </div>
 
         {isSubmitting && (
-          <div className="absolute bottom-14 right-3 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs">
+          <div className="absolute top-14 right-3 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs">
             搜尋中...
           </div>
         )}

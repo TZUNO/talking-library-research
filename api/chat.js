@@ -7,13 +7,15 @@
 const SERPER_SEARCH_URL = 'https://serper.dev/search';
 const SERPER_IMAGES_URL = 'https://serper.dev/images';
 
-const systemPromptNoSearch = `你是一位永續建材檢索助理。根據使用者的描述，推薦合適的材質並簡要說明理由（強度、耐候、環保、成本等）。回答請簡潔、條列，並註明可參考的標準或認證（如 ASTM、ISO、CNS）若適用。`;
+const systemPromptNoSearch = `你是一位永續建材檢索助理。根據使用者的描述，推薦合適的材質並簡要說明理由（強度、耐候、環保、成本等）。回答請簡潔、條列，並註明可參考的標準或認證（如 ASTM、ISO、CNS）若適用。
+回答的最後一句請反問受測者：「還有其他想問的問題嗎？」或類似問句，鼓勵繼續提問。`;
 
 const systemPromptWithSearch = `你是一位永續建材檢索助理，會根據「搜尋到的網路資料」回答使用者。
 請用以下搜尋結果作為依據，整理成簡潔、條列式的回覆，並註明可參考的標準或認證（如 ASTM、ISO、CNS）若適用。
 若搜尋結果中有圖片或具體產品/規格，可在回答中提及。
 回答請圖文並茂：用 Markdown 格式（**粗體**、# 標題、列表、段落），並在適當處註明資料來源（例如「根據 [來源標題](連結)」）。
-不要捏造搜尋結果中沒有的內容。`;
+不要捏造搜尋結果中沒有的內容。
+回答的最後一句請反問受測者：「還有其他想問的問題嗎？」或類似問句，鼓勵繼續提問。`;
 
 async function serperSearch(query, apiKey, num = 8) {
   const res = await fetch(SERPER_SEARCH_URL, {
