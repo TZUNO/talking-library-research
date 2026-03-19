@@ -1,11 +1,11 @@
 /**
- * 動態提示生成：根據使用者輸入或「最後一則 AI 回應」產生三個面向的提示
+ * 動態提示生成：根據「最後一則 AI 回應」或使用者輸入產生三個面向的提示
  * 三個面向固定為：情境／氛圍、性能／條件、比較／決策
  *
  * 邏輯：
- * 1. 若已有 AI 回應 → 以 AI 回應為脈絡，產生後續提問提示
- * 2. 若無 AI 回應、或輸入為空/提示格式 → 顯示預設三項
- * 3. 若有使用者輸入（非提示格式）→ 以輸入為脈絡產生提示
+ * 1. 第一輪（尚無 AI 回應）：一律顯示預設三項，不隨使用者打字改變
+ * 2. 第二輪起（已有 AI 回應）：以 AI 回應為脈絡，產生後續提問提示
+ * 3. 第二輪起、若使用者自行輸入（非提示格式）：以輸入為脈絡產生提示
  */
 
 export interface DynamicPrompt {
@@ -62,8 +62,14 @@ export function generateDynamicPrompts(
   const trimmed = inputText.trim();
   const hasAiResponse = lastAssistantContent && lastAssistantContent.trim().length > 0;
 
-  // 已有 AI 回應 → 以 AI 回應為脈絡產生後續提問
-  if (hasAiResponse) {
+  // 第一輪：尚無 AI 回應 → 一律顯示預設，不隨打字內容改變
+  if (!hasAiResponse) {
+    return DEFAULT_PROMPTS;
+  }
+
+  // 第二輪起：已有 AI 回應
+  // 若輸入為空或已是提示格式 → 以 AI 回應為脈絡的後續提問
+  if (!trimmed || isPromptLike(trimmed)) {
     return [
       {
         category: '情境／氛圍',
@@ -83,12 +89,7 @@ export function generateDynamicPrompts(
     ];
   }
 
-  // 無 AI 回應：若輸入為空或已是提示格式，顯示預設
-  if (!trimmed || isPromptLike(trimmed)) {
-    return DEFAULT_PROMPTS;
-  }
-
-  // 有使用者輸入（非提示格式）→ 以輸入為脈絡
+  // 第二輪起：使用者自行輸入（非提示格式）→ 以輸入為脈絡
   const context = trimmed.length > 50 ? trimmed.slice(0, 50) + '…' : trimmed;
   return [
     {
