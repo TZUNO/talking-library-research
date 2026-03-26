@@ -117,13 +117,14 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                   <ImageIcon className="w-3.5 h-3.5" />
                   相關圖片
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 min-w-0">
+                <div className="app-image-grid">
                   {displayImages.map((img, j) => (
                     <a
                       key={`${img.url}-${j}`}
                       href={img.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      title={img.title || '點擊在新分頁開啟大圖'}
                       className="app-image-grid-cell min-h-0"
                     >
                       <img

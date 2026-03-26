@@ -264,27 +264,38 @@ html {
 }
 
 /* -------------------------------------------------------------------------- */
-/* App 圖片：全站一致（響應式寬度、不拉伸、網格裁切、降版面跳動）              */
+/* App 圖片：縮圖尺寸（類 GPT／Perplexity／YouTube 小預覽），點連結再看大圖        */
 /* -------------------------------------------------------------------------- */
 :root {
-  --app-image-content-max-width: min(100%, 42rem);
-  --app-image-content-max-height: 16rem;
-  --app-image-radius: var(--radius-lg);
+  /* 內文 Markdown 圖：小卡，不撐滿整個氣泡 */
+  --app-image-inline-max: 17.5rem; /* ~280px */
+  --app-image-content-max-height: 9.875rem; /* ~158px，約 16:9 @ 280px 高上限 */
+  /* 相關圖片：YouTube 式 16:9 小縮圖 */
+  --app-image-grid-thumb-width: 10rem; /* 160px */
+  --app-image-radius: var(--radius-md);
 }
 
 /**
- * 內文／Markdown 圖：依容器縮放、高度自動、過高時以 object-fit: contain 維持比例
+ * 內文／Markdown 圖：寬度依比例縮小、過高裁在 max-height、contain 不變形
  */
 .app-image-wrap {
   display: block;
-  width: 100%;
-  max-width: var(--app-image-content-max-width);
-  margin-block: 0.5rem;
+  width: fit-content;
+  max-width: min(100%, var(--app-image-inline-max));
+  margin-block: 0.375rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-image-wrap:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--app-image-radius);
 }
 
 .app-image-content {
   display: block;
-  width: 100%;
+  width: auto;
   max-width: 100%;
   height: auto;
   max-height: var(--app-image-content-max-height);
@@ -296,15 +307,24 @@ html {
 }
 
 /**
- * 相關圖片網格：固定 1:1 區域，object-fit: cover 避免變形（僅裁切邊緣）
+ * 相關圖片：橫向小縮圖列，16:9、固定最大寬度，點擊另開原圖預覽
  */
+.app-image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .app-image-grid-cell {
   display: block;
   overflow: hidden;
+  flex: 0 0 auto;
+  width: min(100%, var(--app-image-grid-thumb-width));
   border-radius: var(--app-image-radius);
   border: 1px solid var(--border);
   background-color: var(--muted);
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 16 / 9;
 }
 
 .app-image-thumb {

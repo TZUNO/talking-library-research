@@ -19,7 +19,14 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
       const leadingImg = consumeLeadingMarkdownImage(remaining);
       if (leadingImg) {
         result.push(
-          <span key={`img-${key++}`} className="app-image-wrap">
+          <a
+            key={`img-${key++}`}
+            href={leadingImg.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="app-image-wrap"
+            title="點擊在新分頁開啟大圖"
+          >
             <img
               src={leadingImg.url}
               alt={leadingImg.alt || ''}
@@ -28,7 +35,7 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
               referrerPolicy="no-referrer"
               decoding="async"
             />
-          </span>
+          </a>
         );
         remaining = remaining.slice(leadingImg.rawLength);
         continue;
@@ -65,7 +72,14 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
           result.push(<strong key={`b-${key++}`}>{match[1]}</strong>);
         } else if (type === 'image') {
           result.push(
-            <span key={`img-${key++}`} className="app-image-wrap">
+            <a
+              key={`img-${key++}`}
+              href={match[2]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="app-image-wrap"
+              title="點擊在新分頁開啟大圖"
+            >
               <img
                 src={match[2]}
                 alt={match[1] || ''}
@@ -74,7 +88,7 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
                 referrerPolicy="no-referrer"
                 decoding="async"
               />
-            </span>
+            </a>
           );
         } else {
           result.push(
