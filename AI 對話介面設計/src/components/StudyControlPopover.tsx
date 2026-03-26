@@ -100,7 +100,7 @@ export function StudyControlPopover({
             <label className="text-xs font-medium text-muted-foreground block mb-1.5">
               最終選定材料（選填）
             </label>
-            <p className="text-[11px] text-muted-foreground/90 mb-1.5 leading-snug">
+            <p className="text-[11px] text-white mb-1.5 leading-snug">
               實驗結束時請填寫您最後決定的材質，供研究確認是否達成目標。
             </p>
             <textarea

@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * 簡易 Markdown 轉 React（支援 **粗體**、# 標題、- 列表、[文字](連結)）
+ * 簡易 Markdown 轉 React（支援 **粗體**、# 標題、- 列表、[文字](連結)、![說明](圖片URL)）
  * 顯示時不露出原始符號，以易讀的格式呈現
  */
 export function simpleMarkdownToReact(text: string): React.ReactNode {
@@ -16,15 +16,21 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
 
     while (remaining.length > 0) {
       const boldMatch = remaining.match(/\*\*([^*]+)\*\*/);
+      const imageMatch = remaining.match(/!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/);
       const linkMatch = remaining.match(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
       let match: RegExpMatchArray | null = null;
-      let type: 'bold' | 'link' = 'bold';
+      let type: 'bold' | 'image' | 'link' = 'bold';
       let index = remaining.length;
 
       if (boldMatch && boldMatch.index !== undefined) {
         index = boldMatch.index;
         match = boldMatch;
         type = 'bold';
+      }
+      if (imageMatch && imageMatch.index !== undefined && imageMatch.index < index) {
+        index = imageMatch.index;
+        match = imageMatch;
+        type = 'image';
       }
       if (linkMatch && linkMatch.index !== undefined && linkMatch.index < index) {
         index = linkMatch.index;
@@ -38,6 +44,18 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
         }
         if (type === 'bold') {
           result.push(<strong key={`b-${key++}`}>{match[1]}</strong>);
+        } else if (type === 'image') {
+          result.push(
+            <span key={`img-${key++}`} className="block my-2 max-w-md">
+              <img
+                src={match[2]}
+                alt={match[1] || ''}
+                className="rounded-lg border border-border w-full h-auto max-h-64 object-contain bg-muted/30"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            </span>
+          );
         } else {
           result.push(
             <a

@@ -58,6 +58,21 @@ function buildSearchContext(serperData) {
   return parts.join('\n\n');
 }
 
+/** 將搜尋到的圖片 URL 交給模型，要求以 Markdown 圖片語法寫入正文 */
+function buildImagePromptBlock(images) {
+  if (!images?.length) return '';
+  const lines = images
+    .filter((img) => img && img.url)
+    .map((img, i) => `${i + 1}. ${img.title ? `${img.title} — ` : ''}${img.url}`)
+    .join('\n');
+  if (!lines) return '';
+  return (
+    '\n\n--- 搜尋到的相關圖片（必須使用）---\n' +
+    '以下為 Serper 圖片搜尋結果。請在回答**正文**中穿插至少 2～3 張，使用 Markdown：`![材質或場景簡短說明](完整圖片URL)`，放在對應材料段落旁，勿只列連結、勿全部堆在文末。\n' +
+    lines
+  );
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -91,7 +106,8 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const serperKey = process.env.SERPER_API_KEY || '';
+  /** Vercel / 本機需在環境變數設定 SERPER_API_KEY（名稱須完全一致，部署後需重新部署） */
+  const serperKey = (process.env.SERPER_API_KEY || '').trim();
   let searchContext = '';
   let sources = [];
   let images = [];
@@ -100,7 +116,7 @@ module.exports = async function handler(req, res) {
     try {
       const [searchData, imageData] = await Promise.all([
         serperSearch(message, serperKey),
-        serperImages(message, serperKey).catch(() => null),
+        serperImages(message, serperKey, 8).catch(() => null),
       ]);
       searchContext = buildSearchContext(searchData);
       const organic = searchData?.organic || [];
@@ -115,7 +131,7 @@ module.exports = async function handler(req, res) {
       let imageList = Array.isArray(imageData) ? imageData : imageData?.images;
       if (!imageList?.length && searchData?.images?.length) imageList = searchData.images;
       if (imageList && imageList.length) {
-        images = imageList.slice(0, 6).map((img) => ({
+        images = imageList.slice(0, 8).map((img) => ({
           url: pickImageUrl(img),
           title: pickImageTitle(img),
         })).filter((img) => img.url);
@@ -125,13 +141,25 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  const systemPrompt = searchContext
-    ? `${systemPromptWithSearch}\n\n--- 搜尋結果 ---\n${searchContext}\n---`
-    : systemPromptNoSearch;
+  const imageBlockForModel = buildImagePromptBlock(images);
 
-  const userContent = searchContext
-    ? `使用者問題：${message}\n\n請根據上方搜尋結果回答，並在回答中適當引用來源。`
-    : message;
+  const webContextParts = [];
+  if (searchContext) {
+    webContextParts.push(`--- 搜尋結果 ---\n${searchContext}\n---`);
+  }
+  if (imageBlockForModel) {
+    webContextParts.push(imageBlockForModel.trim());
+  }
+
+  const systemPrompt =
+    webContextParts.length > 0
+      ? `${systemPromptWithSearch}\n\n${webContextParts.join('\n\n')}`
+      : systemPromptNoSearch;
+
+  const userContent =
+    webContextParts.length > 0
+      ? `使用者問題：${message}\n\n請根據上方搜尋結果與圖片 URL 回答，並在回答中適當引用來源；若有提供圖片 URL，務必在正文中以 Markdown 圖片語法插入。`
+      : message;
 
   const openaiMessages = [
     { role: 'system', content: systemPrompt },
