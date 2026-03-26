@@ -117,19 +117,19 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                   <ImageIcon className="w-3.5 h-3.5" />
                   相關圖片
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 min-w-0">
                   {displayImages.map((img, j) => (
                     <a
                       key={`${img.url}-${j}`}
                       href={img.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block rounded-lg overflow-hidden border border-border bg-muted aspect-square"
+                      className="app-image-grid-cell min-h-0"
                     >
                       <img
                         src={img.url}
                         alt={img.title || ''}
-                        className="w-full h-full object-cover"
+                        className="app-image-thumb"
                         loading="lazy"
                         referrerPolicy="no-referrer"
                         decoding="async"

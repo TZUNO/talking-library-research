@@ -19,11 +19,11 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
       const leadingImg = consumeLeadingMarkdownImage(remaining);
       if (leadingImg) {
         result.push(
-          <span key={`img-${key++}`} className="block my-2 max-w-md">
+          <span key={`img-${key++}`} className="app-image-wrap">
             <img
               src={leadingImg.url}
               alt={leadingImg.alt || ''}
-              className="rounded-lg border border-border w-full h-auto max-h-64 object-contain bg-muted/30"
+              className="app-image-content"
               loading="lazy"
               referrerPolicy="no-referrer"
               decoding="async"
@@ -65,13 +65,14 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
           result.push(<strong key={`b-${key++}`}>{match[1]}</strong>);
         } else if (type === 'image') {
           result.push(
-            <span key={`img-${key++}`} className="block my-2 max-w-md">
+            <span key={`img-${key++}`} className="app-image-wrap">
               <img
                 src={match[2]}
                 alt={match[1] || ''}
-                className="rounded-lg border border-border w-full h-auto max-h-64 object-contain bg-muted/30"
+                className="app-image-content"
                 loading="lazy"
                 referrerPolicy="no-referrer"
+                decoding="async"
               />
             </span>
           );
