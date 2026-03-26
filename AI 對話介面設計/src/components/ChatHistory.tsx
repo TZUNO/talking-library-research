@@ -1,5 +1,6 @@
 import { Loader2, User, Bot, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { simpleMarkdownToReact } from '../lib/simpleMarkdown';
+import { mergeDisplayImages } from '../lib/chatImages';
 
 export interface ChatSource {
   title: string;
@@ -42,7 +43,12 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
-      {messages.map((message, i) => (
+      {messages.map((message, i) => {
+        const displayImages =
+          message.role === 'assistant'
+            ? mergeDisplayImages(message.images, message.content)
+            : [];
+        return (
         <div key={i} className="mb-6 last:mb-0">
           <div
             className={`flex gap-4 ${
@@ -105,16 +111,16 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                 </ul>
               </div>
             )}
-            {message.role === 'assistant' && (message.images?.length ?? 0) > 0 && (
+            {message.role === 'assistant' && displayImages.length > 0 && (
               <div className="mt-3 pt-3 border-t border-border">
                 <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                   <ImageIcon className="w-3.5 h-3.5" />
                   相關圖片
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {message.images.map((img, j) => (
+                  {displayImages.map((img, j) => (
                     <a
-                      key={j}
+                      key={`${img.url}-${j}`}
                       href={img.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -126,6 +132,12 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                         className="w-full h-full object-cover"
                         loading="lazy"
                         referrerPolicy="no-referrer"
+                        decoding="async"
+                        onError={(e) => {
+                          const el = e.currentTarget;
+                          el.style.opacity = '0.35';
+                          el.alt = '圖片無法載入（可能被來源網站阻擋）';
+                        }}
                       />
                     </a>
                   ))}
@@ -141,7 +153,8 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
           )}
           </div>
         </div>
-      ))}
+        );
+      })}
 
       {isSubmitting && (
         <div className="mb-0 flex gap-4 justify-start">

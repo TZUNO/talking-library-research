@@ -1,4 +1,5 @@
 import React from 'react';
+import { consumeLeadingMarkdownImage } from './chatImages';
 
 /**
  * 簡易 Markdown 轉 React（支援 **粗體**、# 標題、- 列表、[文字](連結)、![說明](圖片URL)）
@@ -15,6 +16,24 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
     let remaining = line;
 
     while (remaining.length > 0) {
+      const leadingImg = consumeLeadingMarkdownImage(remaining);
+      if (leadingImg) {
+        result.push(
+          <span key={`img-${key++}`} className="block my-2 max-w-md">
+            <img
+              src={leadingImg.url}
+              alt={leadingImg.alt || ''}
+              className="rounded-lg border border-border w-full h-auto max-h-64 object-contain bg-muted/30"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              decoding="async"
+            />
+          </span>
+        );
+        remaining = remaining.slice(leadingImg.rawLength);
+        continue;
+      }
+
       const boldMatch = remaining.match(/\*\*([^*]+)\*\*/);
       const imageMatch = remaining.match(/!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/);
       const linkMatch = remaining.match(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
