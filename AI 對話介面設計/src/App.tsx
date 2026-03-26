@@ -9,7 +9,7 @@ import { logExperimentData, type InterfaceType } from './lib/experimentLog';
 import { chatMaterialQuery } from './lib/gemini';
 
 const STORAGE_PARTICIPANT_ID = 'study_participant_id';
-const STORAGE_API_KEY = 'study_api_key';
+const STORAGE_FINAL_MATERIAL = 'study_final_selected_material';
 
 function getLastAssistantContent(messages: ChatMessage[]): string | undefined {
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -29,10 +29,10 @@ function loadStoredParticipantId(): string {
   }
 }
 
-function loadStoredApiKey(): string {
+function loadStoredFinalMaterial(): string {
   if (typeof window === 'undefined') return '';
   try {
-    return localStorage.getItem(STORAGE_API_KEY) ?? '';
+    return localStorage.getItem(STORAGE_FINAL_MATERIAL) ?? '';
   } catch {
     return '';
   }
@@ -44,14 +44,14 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [interfaceType, setInterfaceType] = useState<InterfaceType>('Template');
   const [participantId, setParticipantId] = useState('');
-  const [apiKey, setApiKey] = useState('');
+  const [finalSelectedMaterial, setFinalSelectedMaterial] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const tracking = useExperimentTracking();
 
   useEffect(() => {
     setParticipantId(loadStoredParticipantId());
-    setApiKey(loadStoredApiKey());
+    setFinalSelectedMaterial(loadStoredFinalMaterial());
   }, []);
 
   const handleTemplateClick = useCallback(
@@ -74,10 +74,6 @@ export default function App() {
       alert('請輸入受測者編號');
       return;
     }
-    if (!apiKey) {
-      alert('請先設定 API Key');
-      return;
-    }
 
     const userText = inputValue.trim();
     const thoughtTime = tracking.getThoughtTimeSeconds();
@@ -90,7 +86,7 @@ export default function App() {
     setIsSubmitting(true);
 
     try {
-      const reply = await chatMaterialQuery(userText, apiKey, messages);
+      const reply = await chatMaterialQuery(userText, messages);
       setMessages((prev) => [
         ...prev,
         {
@@ -113,6 +109,7 @@ export default function App() {
         responseStatus: 'success',
         responseLength: responseText.length,
         responseText,
+        finalSelectedMaterial: finalSelectedMaterial.trim() || undefined,
       }).catch(() => {});
     } catch (err) {
       const msg = err instanceof Error ? err.message : '檢索時發生錯誤，請稍後再試。';
@@ -129,12 +126,13 @@ export default function App() {
         responseStatus: 'error',
         responseLength: 0,
         errorMessage: msg,
+        finalSelectedMaterial: finalSelectedMaterial.trim() || undefined,
       }).catch(() => {});
     } finally {
       setIsSubmitting(false);
       tracking.resetForNextTurn(false);
     }
-  }, [inputValue, isSubmitting, participantId, apiKey, interfaceType, tracking]);
+  }, [inputValue, isSubmitting, participantId, interfaceType, tracking, finalSelectedMaterial]);
 
   const inputPlaceholder =
     interfaceType === 'Free-form'
@@ -161,8 +159,8 @@ export default function App() {
               onInterfaceTypeChange={setInterfaceType}
               participantId={participantId}
               onParticipantIdChange={setParticipantId}
-              apiKey={apiKey}
-              onApiKeyChange={setApiKey}
+              finalSelectedMaterial={finalSelectedMaterial}
+              onFinalSelectedMaterialChange={setFinalSelectedMaterial}
             />
           </header>
 

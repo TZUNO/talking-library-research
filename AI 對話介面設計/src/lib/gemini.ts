@@ -1,6 +1,6 @@
 /**
  * 材質檢索對話 API
- * 一律呼叫 /api/chat；API Key 可從 Study Control Bar 傳入（存 localStorage），否則後端用 env
+ * 一律呼叫 /api/chat；OpenAI Key 僅由後端環境變數 OPENAI_API_KEY 提供，不經前端
  * 回覆可含網路搜尋來源與圖片（Perplexity 風格）
  */
 export interface ChatSource {
@@ -34,13 +34,11 @@ export interface HistoryMessage {
  */
 export async function chatMaterialQuery(
   userMessage: string,
-  apiKey?: string,
   history?: HistoryMessage[]
 ): Promise<ChatResponse> {
-  const payload: { message: string; apiKey?: string; history?: HistoryMessage[] } = {
+  const payload: { message: string; history?: HistoryMessage[] } = {
     message: userMessage,
   };
-  if (apiKey) payload.apiKey = apiKey;
   if (history?.length) payload.history = history.map((m) => ({ role: m.role, content: m.content }));
 
   const res = await fetch('/api/chat', {

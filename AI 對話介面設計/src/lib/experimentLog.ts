@@ -23,6 +23,8 @@ export interface ExperimentDataPayload {
   responseText?: string;
   /** 錯誤訊息（失敗時） */
   errorMessage?: string;
+  /** 受測者在研究控制面板填寫的最終選定材料（用於確認是否達成目標） */
+  finalSelectedMaterial?: string;
 }
 
 const GAS_URL = import.meta.env.VITE_GAS_LOG_URL ?? '';

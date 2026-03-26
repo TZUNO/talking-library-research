@@ -18,7 +18,8 @@ const HEADERS = [
   '回應狀態',
   '回應字數',
   'AI 回應',
-  '錯誤訊息'
+  '錯誤訊息',
+  '最終選定材料'
 ];
 
 /** template-X 對應實驗分析用面向 */
@@ -128,7 +129,8 @@ function payloadToRow(p) {
     p.responseStatus || '',
     p.responseLength != null ? p.responseLength : '',
     responseText,
-    p.errorMessage || ''
+    p.errorMessage || '',
+    p.finalSelectedMaterial || ''
   ];
 }
 

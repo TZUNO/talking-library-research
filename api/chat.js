@@ -2,7 +2,7 @@
  * Vercel Serverless API：網路搜尋 + OpenAI 綜合回覆（Perplexity 風格）
  * - 若有 SERPER_API_KEY：先呼叫 Serper 搜尋，再以搜尋結果為脈絡用 OpenAI 生成圖文並茂回覆
  * - 若無：僅用 OpenAI（行為與原本相同）
- * 環境變數：OPENAI_API_KEY、SERPER_API_KEY（選用）
+ * 環境變數：OPENAI_API_KEY（僅伺服器端，勿由前端傳入）、SERPER_API_KEY（選用）
  */
 const SERPER_SEARCH_URL = 'https://serper.dev/search';
 const SERPER_IMAGES_URL = 'https://serper.dev/images';
@@ -84,10 +84,10 @@ module.exports = async function handler(req, res) {
     .map((m) => ({ role: m.role, content: String(m.content).trim() }))
     .filter((m) => m.content.length > 0);
 
-  const openaiKey = body?.apiKey?.trim() || process.env.OPENAI_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
   if (!openaiKey) {
     return res.status(500).json({
-      error: '請先設定 API Key（Study Control Bar 儲存至本機後使用）',
+      error: '伺服器未設定 OPENAI_API_KEY，請於部署環境（如 Vercel）設定後重新部署。',
     });
   }
 

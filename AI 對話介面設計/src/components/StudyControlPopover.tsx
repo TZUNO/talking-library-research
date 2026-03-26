@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { FlaskConical, Eye, EyeOff, Save } from 'lucide-react';
+import { FlaskConical, Save } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import type { InterfaceType } from '../lib/experimentLog';
 
 const STORAGE_PARTICIPANT_ID = 'study_participant_id';
-const STORAGE_API_KEY = 'study_api_key';
+const STORAGE_FINAL_MATERIAL = 'study_final_selected_material';
 
 interface StudyControlPopoverProps {
   interfaceType: InterfaceType;
   onInterfaceTypeChange: (v: InterfaceType) => void;
   participantId: string;
   onParticipantIdChange: (v: string) => void;
-  apiKey: string;
-  onApiKeyChange: (v: string) => void;
+  finalSelectedMaterial: string;
+  onFinalSelectedMaterialChange: (v: string) => void;
 }
 
 export function StudyControlPopover({
@@ -20,16 +20,15 @@ export function StudyControlPopover({
   onInterfaceTypeChange,
   participantId,
   onParticipantIdChange,
-  apiKey,
-  onApiKeyChange,
+  finalSelectedMaterial,
+  onFinalSelectedMaterialChange,
 }: StudyControlPopoverProps) {
-  const [showApiKey, setShowApiKey] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     try {
       if (participantId.trim()) localStorage.setItem(STORAGE_PARTICIPANT_ID, participantId.trim());
-      if (apiKey) localStorage.setItem(STORAGE_API_KEY, apiKey);
+      localStorage.setItem(STORAGE_FINAL_MATERIAL, finalSelectedMaterial.trim());
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {
@@ -37,8 +36,8 @@ export function StudyControlPopover({
     }
   };
 
-  const hasAllSet = !!participantId.trim() && !!apiKey;
-  const showBadge = !hasAllSet;
+  const hasParticipantId = !!participantId.trim();
+  const showBadge = !hasParticipantId;
 
   return (
     <Popover>
@@ -99,25 +98,18 @@ export function StudyControlPopover({
 
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-              API Key
+              最終選定材料（選填）
             </label>
-            <div className="relative">
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                value={apiKey}
-                onChange={(e) => onApiKeyChange(e.target.value)}
-                placeholder="儲存後僅存於本機"
-                className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground outline-none focus:border-emerald-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground"
-                aria-label={showApiKey ? '隱藏' : '顯示'}
-              >
-                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+            <p className="text-[11px] text-muted-foreground/90 mb-1.5 leading-snug">
+              實驗結束時請填寫您最後決定的材質，供研究確認是否達成目標。
+            </p>
+            <textarea
+              value={finalSelectedMaterial}
+              onChange={(e) => onFinalSelectedMaterialChange(e.target.value)}
+              placeholder="例如：低甲醛合板、304 不鏽鋼、壓克力板…"
+              rows={2}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground outline-none focus:border-emerald-500 resize-y min-h-[2.5rem] max-h-24"
+            />
           </div>
 
           <button
@@ -130,7 +122,7 @@ export function StudyControlPopover({
           </button>
 
           <p className="text-xs text-muted-foreground text-center">
-            {hasAllSet ? '已設定' : '未設定'}
+            {hasParticipantId ? '已填受測者編號' : '請填受測者編號'}
           </p>
         </div>
       </PopoverContent>
