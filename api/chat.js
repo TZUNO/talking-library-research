@@ -33,7 +33,36 @@ async function serperSearch(query, apiKey, num = 8) {
   return res.json();
 }
 
-async function serperImages(query, apiKey, num = 4) {
+function normalizeSerperImageList(data) {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.images)) return data.images;
+  if (Array.isArray(data.imageResults)) return data.imageResults;
+  if (Array.isArray(data.results)) return data.results;
+  return [];
+}
+
+/** Serper 各端點回傳欄位名稱可能不同，盡量收斂成可當 <img src> 的 URL */
+function pickImageUrlFromRaw(img) {
+  if (!img || typeof img !== 'object') return '';
+  const candidates = [
+    img.imageUrl,
+    img.originalImageUrl,
+    img.original_image_url,
+    img.thumbnailUrl,
+    img.thumbnail_url,
+    img.image,
+    img.src,
+    img.url,
+    img.link,
+  ];
+  for (const c of candidates) {
+    if (typeof c === 'string' && /^https?:\/\//i.test(c.trim())) return c.trim();
+  }
+  return '';
+}
+
+async function serperImages(query, apiKey, num = 8) {
   const res = await fetch(SERPER_IMAGES_URL, {
     method: 'POST',
     headers: {
@@ -42,9 +71,15 @@ async function serperImages(query, apiKey, num = 4) {
     },
     body: JSON.stringify({ q: query, num }),
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    console.warn('[api/chat] Serper images HTTP', res.status, t.slice(0, 200));
+    return null;
+  }
   const data = await res.json().catch(() => null);
-  return data?.images?.slice(0, num) || null;
+  const list = normalizeSerperImageList(data);
+  /** 成功但無結果時回傳 []，與 HTTP 失敗的 null 區分 */
+  return list.length ? list.slice(0, num) : [];
 }
 
 function buildSearchContext(serperData) {
@@ -111,32 +146,75 @@ module.exports = async function handler(req, res) {
   let searchContext = '';
   let sources = [];
   let images = [];
+  /** 診斷用（不含金鑰）：為何沒有圖片時可對照 Response.meta */
+  let serperDiag = {
+    serperEnvSet: Boolean(serperKey),
+    serperSearchOk: false,
+    serperImagesHttpOk: null,
+    rawImageRowsBeforeMap: 0,
+    serperCatchMessage: null,
+  };
 
   if (serperKey) {
     try {
-      const [searchData, imageData] = await Promise.all([
-        serperSearch(message, serperKey),
-        serperImages(message, serperKey, 8).catch(() => null),
-      ]);
-      searchContext = buildSearchContext(searchData);
-      const organic = searchData?.organic || [];
-      sources = organic.slice(0, 8).map((o) => ({ title: o.title || o.link || '', url: o.link || '' }));
+      /** 分開呼叫：避免 /search 失敗時整段 Promise.all 失敗，導致 /images 完全沒跑 */
+      let searchData = null;
+      let imageData = null;
 
-      const pickImageUrl = (img) =>
-        img.imageUrl || img.image || img.link || img.url
-          || img.originalImageUrl || img.thumbnailUrl
-          || img.original_image_url || img.thumbnail_url;
-      const pickImageTitle = (img) => img.title || img.snippet || img.text || img.site_title || '';
+      try {
+        searchData = await serperSearch(message, serperKey);
+        serperDiag.serperSearchOk = true;
+      } catch (err) {
+        serperDiag.serperCatchMessage = `search: ${String(err?.message || err)}`;
+        console.warn('[api/chat] Serper /search failed:', err?.message || err);
+      }
 
-      let imageList = Array.isArray(imageData) ? imageData : imageData?.images;
+      try {
+        imageData = await serperImages(message, serperKey, 8);
+        serperDiag.serperImagesHttpOk = imageData != null;
+      } catch (err) {
+        serperDiag.serperCatchMessage = `images: ${String(err?.message || err)}`;
+        console.warn('[api/chat] Serper /images threw:', err?.message || err);
+      }
+
+      if (searchData) {
+        searchContext = buildSearchContext(searchData);
+        const organic = searchData?.organic || [];
+        sources = organic.slice(0, 8).map((o) => ({ title: o.title || o.link || '', url: o.link || '' }));
+      }
+
+      const pickImageTitle = (img) =>
+        (typeof img?.title === 'string' && img.title) ||
+        (typeof img?.snippet === 'string' && img.snippet) ||
+        (typeof img?.text === 'string' && img.text) ||
+        (typeof img?.site_title === 'string' && img.site_title) ||
+        '';
+
+      let imageList = Array.isArray(imageData) ? imageData : normalizeSerperImageList(imageData);
       if (!imageList?.length && searchData?.images?.length) imageList = searchData.images;
       if (imageList && imageList.length) {
+        serperDiag.rawImageRowsBeforeMap = imageList.length;
         images = imageList.slice(0, 8).map((img) => ({
-          url: pickImageUrl(img),
+          url: pickImageUrlFromRaw(img),
           title: pickImageTitle(img),
         })).filter((img) => img.url);
       }
+      if (!images.length && serperKey) {
+        try {
+          const retry = await serperImages(`${message} 建材 材質`, serperKey, 8);
+          const list2 = Array.isArray(retry) ? retry : normalizeSerperImageList(retry);
+          if (list2?.length) {
+            images = list2.slice(0, 8).map((img) => ({
+              url: pickImageUrlFromRaw(img),
+              title: pickImageTitle(img),
+            })).filter((img) => img.url);
+          }
+        } catch {
+          /* ignore */
+        }
+      }
     } catch (err) {
+      serperDiag.serperCatchMessage = String(err?.message || err || 'unknown');
       console.warn('[api/chat] Serper error (continuing without search):', err.message);
     }
   }
@@ -189,16 +267,46 @@ module.exports = async function handler(req, res) {
       throw new Error(errMsg);
     }
 
-    const text = data?.choices?.[0]?.message?.content?.trim();
+    let text = data?.choices?.[0]?.message?.content?.trim();
     if (!text) {
       throw new Error('OpenAI 未回傳文字');
+    }
+
+    /** 保證前端一定收到可渲染的圖片：Serper 有圖時附加 Markdown（模型常省略 ![...]()） */
+    if (images.length) {
+      const hasMdImg = /!\[[^\]]*\]\(https?:\/\//.test(text);
+      if (!hasMdImg) {
+        const esc = (s) => String(s || '圖片').replace(/[[\]]/g, '');
+        const block = images
+          .filter((im) => im && im.url)
+          .slice(0, 6)
+          .map((im) => `![${esc(im.title)}](${im.url})`)
+          .join('\n\n');
+        if (block) {
+          text = `${text}\n\n### 相關圖片\n\n${block}`;
+        }
+      }
     }
 
     return res.status(200).json({
       text,
       model: openaiModel,
-      sources: sources.length ? sources : undefined,
-      images: images.length ? images : undefined,
+      sources,
+      images,
+      meta: {
+        ...serperDiag,
+        sourcesCount: sources.length,
+        imagesCount: images.length,
+        /** 若為 true 代表 Vercel 未讀到 SERPER_API_KEY（或名稱錯誤）；與 Serper 官網額度無關。 */
+        hint:
+          !serperKey
+            ? 'Set SERPER_API_KEY in Vercel Environment Variables (Production) and redeploy.'
+            : images.length === 0 && serperDiag.rawImageRowsBeforeMap > 0
+              ? 'Serper returned image rows but URLs failed to parse; check Serper response format.'
+              : images.length === 0 && serperDiag.serperSearchOk && !serperDiag.serperImagesHttpOk
+                ? 'Serper /images request failed (see server logs).'
+                : undefined,
+      },
     });
   } catch (err) {
     console.error('[api/chat]', err);

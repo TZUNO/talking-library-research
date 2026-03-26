@@ -66,9 +66,9 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
               {message.role === 'assistant' ? (
                 <div className="space-y-5">
                   {message.content.split(/\n\n+/).map((paragraph, j) => (
-                    <p key={j} className="m-0">
+                    <div key={j} className="m-0">
                       {simpleMarkdownToReact(paragraph.trim())}
-                    </p>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -124,6 +124,8 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                         src={img.url}
                         alt={img.title || ''}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
                       />
                     </a>
                   ))}

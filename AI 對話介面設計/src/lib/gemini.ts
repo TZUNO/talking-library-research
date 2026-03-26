@@ -13,10 +13,23 @@ export interface ChatImage {
   title: string;
 }
 
+/** /api/chat 回傳的診斷欄位（不含金鑰），用於確認 Serper 是否生效 */
+export interface ChatResponseMeta {
+  serperEnvSet?: boolean;
+  serperSearchOk?: boolean;
+  serperImagesHttpOk?: boolean | null;
+  rawImageRowsBeforeMap?: number;
+  serperCatchMessage?: string | null;
+  sourcesCount?: number;
+  imagesCount?: number;
+  hint?: string;
+}
+
 export interface ChatResponse {
   text: string;
   sources?: ChatSource[];
   images?: ChatImage[];
+  meta?: ChatResponseMeta;
 }
 
 export interface ChatMessage {
@@ -57,5 +70,6 @@ export async function chatMaterialQuery(
     text: data.text as string,
     sources: data.sources,
     images: data.images,
+    meta: data.meta as ChatResponseMeta | undefined,
   };
 }

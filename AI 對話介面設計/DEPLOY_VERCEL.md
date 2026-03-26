@@ -72,13 +72,19 @@ Repo 根目錄的 **vercel.json** 已指定從 `AI 對話介面設計` 建置前
    **Name**：`OPENAI_API_KEY`  
    **Value**：你的 OpenAI API Key  
 
-3. 左邊 **Environment** 建議三個都勾選：Production、Preview、Development（這樣每個環境都能用到）。
+3. **（選填但建議）** 網路搜尋與圖片：  
+   **Name**：`SERPER_API_KEY`  
+   **Value**：在 [serper.dev](https://serper.dev) 後台取得的 API Key（與官網「額度」是兩件事；**必須在 Vercel 也設定**，後端才會呼叫 Serper）。  
+   未設定時仍可對話，但不會有搜尋結果與圖片。
+
+4. 左邊 **Environment** 建議三個都勾選：Production、Preview、Development（這樣每個環境都能用到）。
 
 設好後畫面會像這樣：
 
 ```
 VITE_GAS_LOG_URL     = https://script.google.com/macros/s/.../exec
 OPENAI_API_KEY       = sk-...
+SERPER_API_KEY       = （你的 Serper Key）
 ```
 
 ---
