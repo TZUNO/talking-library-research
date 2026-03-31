@@ -2,17 +2,16 @@ import { useMemo } from 'react';
 import { generateDynamicPrompts } from '../lib/dynamicPrompts';
 
 interface TemplateCardProps {
-  inputValue: string;
-  /** 最後一則 AI 回應的純文字，用於產生後續提問提示 */
+  /** 最後一則 AI 回應的純文字；有值時顯示「延伸 AI」三提示，否則顯示預設三提示 */
   lastAssistantContent?: string;
   /** templateId 為面向代號 1／2／3（與 GAS、dynamicPrompts 一致） */
   onTemplateClick: (prompt: string, templateId: '1' | '2' | '3') => void;
 }
 
-export function TemplateCard({ inputValue, lastAssistantContent, onTemplateClick }: TemplateCardProps) {
+export function TemplateCard({ lastAssistantContent, onTemplateClick }: TemplateCardProps) {
   const prompts = useMemo(
-    () => generateDynamicPrompts(inputValue, lastAssistantContent),
-    [inputValue, lastAssistantContent]
+    () => generateDynamicPrompts(lastAssistantContent),
+    [lastAssistantContent]
   );
 
   return (

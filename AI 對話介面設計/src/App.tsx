@@ -236,7 +236,6 @@ export default function App() {
 
               {interfaceType === 'Template' && (
                 <TemplateCard
-                  inputValue={inputValue}
                   lastAssistantContent={getLastAssistantContent(messages)}
                   onTemplateClick={handleTemplateClick}
                 />
