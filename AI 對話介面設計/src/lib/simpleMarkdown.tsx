@@ -151,7 +151,7 @@ export function simpleMarkdownToReact(text: string, options?: SimpleMarkdownOpti
               href={match[2]}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-500 underline hover:text-emerald-400"
+              className="relative z-10 text-emerald-500 underline hover:text-emerald-400 cursor-pointer"
             >
               {match[1]}
             </a>

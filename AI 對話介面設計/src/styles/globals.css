@@ -184,6 +184,14 @@ html {
   font-size: var(--font-size);
 }
 
+/* 對話氣泡裡的連結：確保可點擊（Tailwind reset 拿掉 color/decoration 後容易失效） */
+.break-words a[href] {
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
 /* 左側檢索記錄：scrollbar 融入底色、軌道透明 */
 .history-panel-scroll {
   scrollbar-width: thin;

@@ -1,4 +1,4 @@
-import { Loader2, User, Bot, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Loader2, User, Bot, Image as ImageIcon } from 'lucide-react';
 import { simpleMarkdownToReact } from '../lib/simpleMarkdown';
 import { mergeDisplayImages } from '../lib/chatImages';
 
@@ -95,26 +95,19 @@ export function ChatHistory({ messages, isSubmitting, onImagePreview }: ChatHist
               )}
             </div>
             {message.role === 'assistant' && (message.sources?.length ?? 0) > 0 && (
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  參考來源
-                </p>
-                <ul className="space-y-1.5">
-                  {message.sources.map((s, j) => (
-                    <li key={j}>
-                      <a
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-emerald-500 hover:text-emerald-400 underline truncate block max-w-full"
-                        title={s.title}
-                      >
-                        {s.title || s.url}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {message.sources.map((s, j) => (
+                  <a
+                    key={j}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={s.title || s.url}
+                    className="relative z-10 inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-500 text-[10px] font-semibold leading-none cursor-pointer hover:bg-emerald-500/30 transition-colors"
+                  >
+                    {j + 1}
+                  </a>
+                ))}
               </div>
             )}
             {message.role === 'assistant' && displayImages.length > 0 && (
