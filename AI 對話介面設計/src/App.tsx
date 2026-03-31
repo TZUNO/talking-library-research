@@ -6,7 +6,7 @@ import { ChatHistory, type ChatMessage } from './components/ChatHistory';
 import { StudyControlPopover } from './components/StudyControlPopover';
 import { useExperimentTracking } from './hooks/useExperimentTracking';
 import { ImagePreviewDialog, type ImagePreviewState } from './components/ImagePreviewDialog';
-import { logExperimentData, logImageViewData, type InterfaceType } from './lib/experimentLog';
+import { logExperimentData, type InterfaceType } from './lib/experimentLog';
 import { isHttpUrl } from './lib/safeUrl';
 import { chatMaterialQuery } from './lib/gemini';
 
@@ -51,7 +51,8 @@ export default function App() {
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
   const imagePreviewRef = useRef<ImagePreviewState | null>(null);
   const imagePreviewOpenedAtRef = useRef<number | null>(null);
-  const imageViewSequenceRef = useRef(0);
+  /** 自上一筆 logExperimentData 成功後累計：供「按圖片」「圖片點擊停留時間」 */
+  const imagePreviewAccRef = useRef({ count: 0, durationMs: 0 });
 
   const tracking = useExperimentTracking();
 
@@ -79,26 +80,14 @@ export default function App() {
       const durationMs = Math.max(0, closedAt - openedAt);
       const pid = participantId.trim();
       if (pid) {
-        imageViewSequenceRef.current += 1;
-        void logImageViewData({
-          eventType: 'imageView',
-          userId: pid,
-          interfaceType,
-          openedAt: new Date(openedAt).toISOString(),
-          closedAt: new Date(closedAt).toISOString(),
-          durationMs,
-          durationSeconds: durationMs / 1000,
-          sequence: imageViewSequenceRef.current,
-          imageUrl: current.url,
-          imageTitle: current.title || undefined,
-          previewSource: current.source,
-        });
+        imagePreviewAccRef.current.count += 1;
+        imagePreviewAccRef.current.durationMs += durationMs;
       }
     }
     imagePreviewRef.current = null;
     imagePreviewOpenedAtRef.current = null;
     setImagePreview(null);
-  }, [participantId, interfaceType]);
+  }, [participantId]);
 
   const handleTemplateClick = useCallback(
     (prompt: string, templateId: string) => {
@@ -126,6 +115,8 @@ export default function App() {
     const inputDuration = tracking.getInputDurationSeconds();
     const clickPath = tracking.getClickPath();
     const timestamp = new Date().toISOString();
+    const imagePreviewCount = imagePreviewAccRef.current.count;
+    const imagePreviewDurationSeconds = imagePreviewAccRef.current.durationMs / 1000;
 
     setMessages((prev) => [...prev, { role: 'user', content: userText }]);
     setInputValue('');
@@ -143,7 +134,7 @@ export default function App() {
         },
       ]);
       const responseText = typeof reply?.text === 'string' ? reply.text : '';
-      await logExperimentData({
+      const loggedOk = await logExperimentData({
         userId: pid,
         interfaceType,
         inputText: userText,
@@ -155,12 +146,16 @@ export default function App() {
         responseStatus: 'success',
         responseLength: responseText.length,
         responseText,
-        finalSelectedMaterial: finalSelectedMaterial.trim() || undefined,
-      }).catch(() => {});
+        imagePreviewCount,
+        imagePreviewDurationSeconds,
+      });
+      if (loggedOk) {
+        imagePreviewAccRef.current = { count: 0, durationMs: 0 };
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : '檢索時發生錯誤，請稍後再試。';
       setMessages((prev) => [...prev, { role: 'assistant', content: '檢索失敗：' + msg }]);
-      await logExperimentData({
+      const loggedErr = await logExperimentData({
         userId: pid,
         interfaceType,
         inputText: userText,
@@ -172,13 +167,17 @@ export default function App() {
         responseStatus: 'error',
         responseLength: 0,
         errorMessage: msg,
-        finalSelectedMaterial: finalSelectedMaterial.trim() || undefined,
-      }).catch(() => {});
+        imagePreviewCount,
+        imagePreviewDurationSeconds,
+      });
+      if (loggedErr) {
+        imagePreviewAccRef.current = { count: 0, durationMs: 0 };
+      }
     } finally {
       setIsSubmitting(false);
       tracking.resetForNextTurn(false);
     }
-  }, [inputValue, isSubmitting, participantId, interfaceType, tracking, finalSelectedMaterial]);
+  }, [inputValue, isSubmitting, participantId, interfaceType, tracking]);
 
   const inputPlaceholder =
     interfaceType === 'Free-form'
