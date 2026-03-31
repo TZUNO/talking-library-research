@@ -37,7 +37,7 @@ export function ImagePreviewDialog({ preview, onClose }: ImagePreviewDialogProps
       }}
     >
       <DialogContent
-        className="!flex !max-w-[min(96vw,72rem)] w-[min(96vw,72rem)] max-h-[90vh] flex-col overflow-y-auto overflow-x-hidden p-2 pt-10 sm:p-3 sm:pt-11 gap-2 border-border bg-background/95 backdrop-blur-sm"
+        className="!flex !max-w-[min(96vw,72rem)] sm:!max-w-[min(96vw,72rem)] w-[min(96vw,72rem)] max-h-[90vh] flex-col overflow-y-auto overflow-x-hidden p-2 pt-10 sm:p-3 sm:pt-11 gap-2 border-border bg-background/95 backdrop-blur-sm"
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">
@@ -63,10 +63,13 @@ export function ImagePreviewDialog({ preview, onClose }: ImagePreviewDialogProps
                 src={preview.url}
                 alt={preview.title || '預覽圖'}
                 className="max-h-[min(85vh,1200px)] w-auto max-w-full object-contain"
+                referrerPolicy="no-referrer"
                 decoding="async"
                 loading="eager"
                 fetchPriority="high"
-                onError={() => setLoadError(true)}
+                onError={() => {
+                  if (!loadError) setLoadError(true);
+                }}
               />
             )}
           </div>
