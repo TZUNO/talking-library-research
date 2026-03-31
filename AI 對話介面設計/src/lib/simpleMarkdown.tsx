@@ -1,15 +1,20 @@
 import React from 'react';
 import { consumeLeadingMarkdownImage } from './chatImages';
 
+export interface SimpleMarkdownOptions {
+  /** 若提供，圖片改為站內預覽（不另開分頁），便於實驗紀錄觀看時長 */
+  onImagePreview?: (url: string, alt: string) => void;
+}
+
 /**
  * 簡易 Markdown 轉 React（支援 **粗體**、# 標題、- 列表、[文字](連結)、![說明](圖片URL)）
  * 顯示時不露出原始符號，以易讀的格式呈現
  */
-export function simpleMarkdownToReact(text: string): React.ReactNode {
+export function simpleMarkdownToReact(text: string, options?: SimpleMarkdownOptions): React.ReactNode {
   if (!text) return null;
   const lines = text.split('\n');
-  const parts: React.ReactNode[] = [];
   let key = 0;
+  const onImagePreview = options?.onImagePreview;
 
   const renderInline = (line: string): React.ReactNode => {
     const result: React.ReactNode[] = [];
@@ -18,25 +23,49 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
     while (remaining.length > 0) {
       const leadingImg = consumeLeadingMarkdownImage(remaining);
       if (leadingImg) {
-        result.push(
-          <a
-            key={`img-${key++}`}
-            href={leadingImg.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="app-image-wrap"
-            title="點擊在新分頁開啟大圖"
-          >
-            <img
-              src={leadingImg.url}
-              alt={leadingImg.alt || ''}
-              className="app-image-content"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              decoding="async"
-            />
-          </a>
-        );
+        const alt = leadingImg.alt || '';
+        const k = `img-${key++}`;
+        if (onImagePreview) {
+          result.push(
+            <button
+              key={k}
+              type="button"
+              className="app-image-wrap"
+              onClick={() => onImagePreview(leadingImg.url, alt)}
+              aria-label={alt ? `開啟圖片預覽：${alt}` : '開啟圖片預覽'}
+              title="點擊預覽大圖"
+            >
+              <img
+                src={leadingImg.url}
+                alt={alt}
+                className="app-image-content"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                decoding="async"
+              />
+            </button>
+          );
+        } else {
+          result.push(
+            <a
+              key={k}
+              href={leadingImg.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="app-image-wrap"
+              title="點擊在新分頁開啟大圖"
+            >
+              <img
+                src={leadingImg.url}
+                alt={alt}
+                className="app-image-content"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                decoding="async"
+              />
+            </a>
+          );
+        }
         remaining = remaining.slice(leadingImg.rawLength);
         continue;
       }
@@ -71,25 +100,50 @@ export function simpleMarkdownToReact(text: string): React.ReactNode {
         if (type === 'bold') {
           result.push(<strong key={`b-${key++}`}>{match[1]}</strong>);
         } else if (type === 'image') {
-          result.push(
-            <a
-              key={`img-${key++}`}
-              href={match[2]}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="app-image-wrap"
-              title="點擊在新分頁開啟大圖"
-            >
-              <img
-                src={match[2]}
-                alt={match[1] || ''}
-                className="app-image-content"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                decoding="async"
-              />
-            </a>
-          );
+          const url = match[2];
+          const alt = match[1] || '';
+          const k = `img-${key++}`;
+          if (onImagePreview) {
+            result.push(
+              <button
+                key={k}
+                type="button"
+                className="app-image-wrap"
+                onClick={() => onImagePreview(url, alt)}
+                aria-label={alt ? `開啟圖片預覽：${alt}` : '開啟圖片預覽'}
+                title="點擊預覽大圖"
+              >
+                <img
+                  src={url}
+                  alt={alt}
+                  className="app-image-content"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  decoding="async"
+                />
+              </button>
+            );
+          } else {
+            result.push(
+              <a
+                key={k}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="app-image-wrap"
+                title="點擊在新分頁開啟大圖"
+              >
+                <img
+                  src={url}
+                  alt={alt}
+                  className="app-image-content"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  decoding="async"
+                />
+              </a>
+            );
+          }
         } else {
           result.push(
             <a

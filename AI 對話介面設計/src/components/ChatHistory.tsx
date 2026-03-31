@@ -22,9 +22,11 @@ export interface ChatMessage {
 interface ChatHistoryProps {
   messages: ChatMessage[];
   isSubmitting: boolean;
+  /** 站內圖片預覽（不另開分頁），供實驗紀錄觀看時長 */
+  onImagePreview?: (url: string, title: string, source: 'markdown' | 'related-grid') => void;
 }
 
-export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
+export function ChatHistory({ messages, isSubmitting, onImagePreview }: ChatHistoryProps) {
   if (messages.length === 0 && !isSubmitting) {
     return (
       <div className="flex items-center justify-center h-full px-6">
@@ -73,7 +75,11 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                 <div className="space-y-5">
                   {message.content.split(/\n\n+/).map((paragraph, j) => (
                     <div key={j} className="m-0">
-                      {simpleMarkdownToReact(paragraph.trim())}
+                      {simpleMarkdownToReact(paragraph.trim(), {
+                        onImagePreview: onImagePreview
+                          ? (url, alt) => onImagePreview(url, alt, 'markdown')
+                          : undefined,
+                      })}
                     </div>
                   ))}
                 </div>
@@ -119,13 +125,15 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                 </p>
                 <div className="app-image-grid">
                   {displayImages.map((img, j) => (
-                    <a
+                    <button
                       key={`${img.url}-${j}`}
-                      href={img.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={img.title || '點擊在新分頁開啟大圖'}
+                      type="button"
+                      title={img.title || '點擊預覽大圖'}
+                      aria-label={img.title ? `開啟圖片預覽：${img.title}` : '開啟圖片預覽'}
                       className="app-image-grid-cell min-h-0"
+                      onClick={() =>
+                        onImagePreview?.(img.url, img.title || '', 'related-grid')
+                      }
                     >
                       <img
                         src={img.url}
@@ -140,7 +148,7 @@ export function ChatHistory({ messages, isSubmitting }: ChatHistoryProps) {
                           el.alt = '圖片無法載入（可能被來源網站阻擋）';
                         }}
                       />
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>

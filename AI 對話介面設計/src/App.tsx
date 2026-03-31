@@ -1,11 +1,13 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { TemplateCard } from './components/TemplateCard';
 import { ConversationInput } from './components/ConversationInput';
 import { HistoryPanel } from './components/HistoryPanel';
 import { ChatHistory, type ChatMessage } from './components/ChatHistory';
 import { StudyControlPopover } from './components/StudyControlPopover';
 import { useExperimentTracking } from './hooks/useExperimentTracking';
-import { logExperimentData, type InterfaceType } from './lib/experimentLog';
+import { ImagePreviewDialog, type ImagePreviewState } from './components/ImagePreviewDialog';
+import { logExperimentData, logImageViewData, type InterfaceType } from './lib/experimentLog';
+import { isHttpUrl } from './lib/safeUrl';
 import { chatMaterialQuery } from './lib/gemini';
 
 const STORAGE_PARTICIPANT_ID = 'study_participant_id';
@@ -46,6 +48,10 @@ export default function App() {
   const [participantId, setParticipantId] = useState('');
   const [finalSelectedMaterial, setFinalSelectedMaterial] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
+  const imagePreviewRef = useRef<ImagePreviewState | null>(null);
+  const imagePreviewOpenedAtRef = useRef<number | null>(null);
+  const imageViewSequenceRef = useRef(0);
 
   const tracking = useExperimentTracking();
 
@@ -53,6 +59,46 @@ export default function App() {
     setParticipantId(loadStoredParticipantId());
     setFinalSelectedMaterial(loadStoredFinalMaterial());
   }, []);
+
+  const openImagePreview = useCallback(
+    (url: string, title: string, source: 'markdown' | 'related-grid') => {
+      if (!isHttpUrl(url)) return;
+      const next: ImagePreviewState = { url, title, source };
+      imagePreviewRef.current = next;
+      imagePreviewOpenedAtRef.current = Date.now();
+      setImagePreview(next);
+    },
+    []
+  );
+
+  const closeImagePreview = useCallback(() => {
+    const openedAt = imagePreviewOpenedAtRef.current;
+    const current = imagePreviewRef.current;
+    if (current && openedAt != null) {
+      const closedAt = Date.now();
+      const durationMs = Math.max(0, closedAt - openedAt);
+      const pid = participantId.trim();
+      if (pid) {
+        imageViewSequenceRef.current += 1;
+        void logImageViewData({
+          eventType: 'imageView',
+          userId: pid,
+          interfaceType,
+          openedAt: new Date(openedAt).toISOString(),
+          closedAt: new Date(closedAt).toISOString(),
+          durationMs,
+          durationSeconds: durationMs / 1000,
+          sequence: imageViewSequenceRef.current,
+          imageUrl: current.url,
+          imageTitle: current.title || undefined,
+          previewSource: current.source,
+        });
+      }
+    }
+    imagePreviewRef.current = null;
+    imagePreviewOpenedAtRef.current = null;
+    setImagePreview(null);
+  }, [participantId, interfaceType]);
 
   const handleTemplateClick = useCallback(
     (prompt: string, templateId: string) => {
@@ -165,7 +211,11 @@ export default function App() {
           </header>
 
           <div className="flex-1 overflow-y-auto">
-            <ChatHistory messages={messages} isSubmitting={isSubmitting} />
+            <ChatHistory
+              messages={messages}
+              isSubmitting={isSubmitting}
+              onImagePreview={openImagePreview}
+            />
           </div>
 
           {/* 底部輸入區：輸入框 + Template chips（模式在右上角 Popover 切換） */}
@@ -210,6 +260,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <ImagePreviewDialog preview={imagePreview} onClose={closeImagePreview} />
 
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}

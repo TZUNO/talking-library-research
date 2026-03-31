@@ -5,7 +5,8 @@ interface TemplateCardProps {
   inputValue: string;
   /** 最後一則 AI 回應的純文字，用於產生後續提問提示 */
   lastAssistantContent?: string;
-  onTemplateClick: (prompt: string, templateId: string) => void;
+  /** templateId 為面向代號 1／2／3（與 GAS、dynamicPrompts 一致） */
+  onTemplateClick: (prompt: string, templateId: '1' | '2' | '3') => void;
 }
 
 export function TemplateCard({ inputValue, lastAssistantContent, onTemplateClick }: TemplateCardProps) {

@@ -1,11 +1,14 @@
 /**
- * Google Apps Script：接收前端實驗記錄，寫入試算表分頁「ExperimentalData」
+ * Google Apps Script：接收前端實驗記錄
+ * - 分頁「ExperimentalData」：對話回合
+ * - 分頁「ImageViewData」：圖片預覽觀看時長（eventType === 'imageView'）
  * 部署為「網路應用程式」：執行身份「我」、存取「任何人」→ 取得網址後設為 VITE_GAS_LOG_URL
  */
 
-const SHEET_NAME = 'ExperimentalData';
+var SHEET_EXPERIMENT = 'ExperimentalData';
+var SHEET_IMAGE_VIEW = 'ImageViewData';
 
-const HEADERS = [
+var HEADERS_EXPERIMENT = [
   '受測者代號',
   '介面類型',
   '輸入文字',
@@ -22,8 +25,28 @@ const HEADERS = [
   '最終選定材料'
 ];
 
-/** template-X 對應實驗分析用面向 */
+var HEADERS_IMAGE_VIEW = [
+  '受測者代號',
+  '介面類型',
+  '開啟預覽時間',
+  '關閉預覽時間',
+  '觀看時長秒',
+  '觀看時長毫秒',
+  '本次序號',
+  '預覽來源',
+  '圖片說明',
+  '圖片URL'
+];
+
+/**
+ * 面向代號（與前端 clickPath 一致）：
+ * 1＝情境／氛圍、2＝性能／條件、3＝比較／決策
+ * 保留 template-1～3 舊格式相容
+ */
 var TEMPLATE_CATEGORY = {
+  '1': '情境／氛圍',
+  '2': '性能／條件',
+  '3': '比較／決策',
   'template-1': '情境／氛圍',
   'template-2': '性能／條件',
   'template-3': '比較／決策'
@@ -39,7 +62,12 @@ function doPost(e) {
       return createResponse(400, { ok: false, error: 'Empty body' });
     }
     var payload = JSON.parse(raw);
-    var sheet = getOrCreateSheet();
+
+    if (payload.eventType === 'imageView') {
+      return appendImageViewRow(payload);
+    }
+
+    var sheet = getOrCreateSheet(SHEET_EXPERIMENT, HEADERS_EXPERIMENT);
     var row = payloadToRow(payload);
     sheet.appendRow(row);
     return createResponse(200, { ok: true, message: '已寫入一筆記錄' });
@@ -49,7 +77,7 @@ function doPost(e) {
 }
 
 function doGet() {
-  return createResponse(200, { ok: true, message: 'GAS 實驗記錄端點正常', version: '1.0' });
+  return createResponse(200, { ok: true, message: 'GAS 實驗記錄端點正常', version: '2.0' });
 }
 
 function testAppendOne() {
@@ -60,32 +88,50 @@ function testAppendOne() {
     inputLength: 4,
     thoughtTime: 5.2,
     inputDuration: 12.3,
-    clickPath: ['template-1', 'submit'],
+    clickPath: ['1', 'submit'],
     timestamp: new Date().toISOString(),
     responseStatus: 'success',
     responseLength: 100,
     responseText: '這是 AI 回應的測試內容。'
   };
-  var sheet = getOrCreateSheet();
+  var sheet = getOrCreateSheet(SHEET_EXPERIMENT, HEADERS_EXPERIMENT);
   sheet.appendRow(payloadToRow(payload));
   Logger.log('testAppendOne done');
 }
 
-function getOrCreateSheet() {
+function getOrCreateSheet(sheetName, headers) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(SHEET_NAME);
+  var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(HEADERS);
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(headers);
     sheet.getRange('1:1').setFontWeight('bold');
   } else {
     var lastCol = sheet.getLastColumn();
-    if (lastCol < HEADERS.length) {
-      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-      sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
+    if (lastCol < headers.length) {
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     }
   }
   return sheet;
+}
+
+function appendImageViewRow(payload) {
+  var sheet = getOrCreateSheet(SHEET_IMAGE_VIEW, HEADERS_IMAGE_VIEW);
+  var row = [
+    payload.userId || '',
+    payload.interfaceType || '',
+    payload.openedAt || '',
+    payload.closedAt || '',
+    payload.durationSeconds != null ? payload.durationSeconds : '',
+    payload.durationMs != null ? payload.durationMs : '',
+    payload.sequence != null ? payload.sequence : '',
+    payload.previewSource || '',
+    payload.imageTitle || '',
+    payload.imageUrl || ''
+  ];
+  sheet.appendRow(row);
+  return createResponse(200, { ok: true, message: '已寫入圖片觀看紀錄' });
 }
 
 function formatClickPathForSheet(clickPath) {

@@ -293,6 +293,16 @@ html {
   border-radius: var(--app-image-radius);
 }
 
+button.app-image-wrap {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  appearance: none;
+}
+
 .app-image-content {
   display: block;
   width: auto;
@@ -333,4 +343,12 @@ html {
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+button.app-image-grid-cell {
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  appearance: none;
 }
